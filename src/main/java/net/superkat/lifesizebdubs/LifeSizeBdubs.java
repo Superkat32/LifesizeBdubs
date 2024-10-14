@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -38,7 +39,6 @@ public class LifeSizeBdubs {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final ResourceKey<Registry<BdubsVariant>> BDUBS_VARIANT_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MODID, "bdubs_variant"));
-    public static final EntityDataSerializer<Holder<BdubsVariant>> BDUBS_VARIANT_SERIALIZER = EntityDataSerializer.forValueType(BdubsVariant.STREAM_CODEC);
     public static final ResourceKey<BdubsVariant> BDUBS_DEFAULT_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "mybdubs"));
     public static final ResourceKey<BdubsVariant> TEST_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "belovedbdubs"));
 
@@ -80,7 +80,11 @@ public class LifeSizeBdubs {
                 .add(
                     BDUBS_VARIANT_REGISTRY_KEY, bootstrap -> {
                         bootstrap.register(BDUBS_DEFAULT_VARIANT, BdubsVariant.DEFAULT);
-                        bootstrap.register(TEST_VARIANT, new BdubsVariant(ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"), "mossybdubs"));
+                        bootstrap.register(TEST_VARIANT, new BdubsVariant(
+                                "mossybdubs",
+                                ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
+                                Items.MOSS_BLOCK.getDefaultInstance()
+                        ));
                     }
                 ),
                 Set.of(MODID)
