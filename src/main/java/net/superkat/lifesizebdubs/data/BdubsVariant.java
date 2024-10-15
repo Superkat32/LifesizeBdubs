@@ -2,14 +2,12 @@ package net.superkat.lifesizebdubs.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,6 +15,7 @@ import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public record BdubsVariant(String name, ResourceLocation texture, ItemStack item) {
     public static final Codec<BdubsVariant> DIRECT_CODEC = RecordCodecBuilder.create(instance -> {
@@ -55,5 +54,17 @@ public record BdubsVariant(String name, ResourceLocation texture, ItemStack item
             }
         }
         return returnVariant;
+    }
+
+    @Nullable
+    public static BdubsVariant getVariantFromCompoundTag(CompoundTag compound, RegistryAccess registryAccess) {
+        AtomicReference<BdubsVariant> returnVariant = new AtomicReference<>();
+        Optional.ofNullable(ResourceLocation.tryParse(compound.getString("variant")))
+                .map(resourceLocation -> ResourceKey.create(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY, resourceLocation))
+                .flatMap(bdubsVariantResourceKey -> registryAccess.registryOrThrow(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY).getHolder((ResourceKey<BdubsVariant>) bdubsVariantResourceKey))
+                .ifPresent(bdubsVariantReference -> {
+                    returnVariant.set(bdubsVariantReference.value());
+                });
+        return returnVariant.get();
     }
 }

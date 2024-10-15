@@ -3,16 +3,21 @@ package net.superkat.lifesizebdubs.entity;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,9 +33,9 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
-import java.util.List;
+import java.util.Optional;
 
-public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVariant>, GeoEntity {
+public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
@@ -38,19 +43,11 @@ public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVar
     protected static final RawAnimation WAVE_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.wave");
     protected static final RawAnimation CHEER_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.cheer");
 
-    public BdubsVariant variant = BdubsVariant.DEFAULT;
+    public boolean onShoulder = false;
+    public LivingEntity shoulderRidingPlayer = null;
 
-    public BdubsEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
+    public BdubsEntity(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {
         super(entityType, level);
-        chooseVariant(level);
-    }
-
-    public void chooseVariant(Level world) {
-        Registry<BdubsVariant> registry = world.registryAccess().registryOrThrow(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY);
-        List<Holder.Reference<BdubsVariant>> holders = registry.holders().toList();
-        int number = this.level().random.nextInt(holders.size());
-        Holder<BdubsVariant> variant = holders.get(number);
-        this.setVariant(variant.value());
     }
 
     @Override
@@ -72,15 +69,45 @@ public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVar
     }
 
     @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if(DATA_VARIANT_ID.equals(key)) {
+            int variantId = this.entityData.get(DATA_VARIANT_ID);
+            BdubsVariant variant = BdubsVariant.getVariantFromInt(variantId, this.registryAccess());
+            this.setVariant(variant);
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        Optional<Holder.Reference<BdubsVariant>> holder = registryAccess().registryOrThrow(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY).getHolder(BdubsVariant.getIntFromVariant(this.getVariant(), this.registryAccess()));
+        holder.flatMap(Holder.Reference::unwrapKey).ifPresent(bdubsVariantResourceKey -> compound.putString("variant", bdubsVariantResourceKey.location().toString()));
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        BdubsVariant bdubsVariant = BdubsVariant.getVariantFromCompoundTag(compound, this.registryAccess());
+        if(bdubsVariant != null) {
+            this.setVariant(bdubsVariant);
+        }
+    }
+
+    @Override
     public void setVariant(@NotNull BdubsVariant variant) {
         int id = BdubsVariant.getIntFromVariant(variant, this.registryAccess());
         this.entityData.set(DATA_VARIANT_ID, id);
-        this.variant = variant;
     }
 
     @Override @NotNull
     public BdubsVariant getVariant() {
-        return this.variant;
+        return BdubsVariant.getVariantFromInt(this.entityData.get(DATA_VARIANT_ID), this.registryAccess());
+    }
+
+    public void setOnShoulder(boolean onShoulder, LivingEntity player) {
+        this.onShoulder = onShoulder;
+        this.shoulderRidingPlayer = player;
     }
 
     @Override
@@ -96,6 +123,10 @@ public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVar
             if(!event.isMoving()) {
                 return event.setAndContinue(IDLE_ANIM);
             }
+
+            if(this.onShoulder) {
+                return event.setAndContinue(IDLE_ANIM);
+            }
             return PlayState.STOP;
         }));
     }
@@ -103,17 +134,25 @@ public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVar
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
+        boolean hasOwner = this.getOwner() != null;
+        boolean isOwner = hasOwner && player == this.getOwner();
+        boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
-        if(newVariant != null && newVariant != this.variant) {
+        if(newVariant != null && newVariant != this.getVariant()) {
             itemStack.consume(1, player);
-            boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
+            this.setOwnerUUID(player.getUUID());
             this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_AMBIENT_WITH_ITEM, SoundSource.AMBIENT);
-            if(hadItem || newVariant != this.variant) {
+            if(hadItem || newVariant != this.getVariant()) {
                 spawnFunnyParticles();
             }
             this.setVariant(newVariant);
             return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+        if(isOwner && hadItem) {
+            if(player instanceof ServerPlayer serverPlayer) {
+                this.setEntityOnShoulder(serverPlayer);
+            }
         }
         return super.mobInteract(player, hand);
     }
@@ -124,6 +163,21 @@ public class BdubsEntity extends TamableAnimal implements VariantHolder<BdubsVar
             this.level().addParticle(ParticleTypes.GLOW_SQUID_INK, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 4, this.random.nextGaussian() / 8, this.random.nextGaussian() / 4);
             this.level().addParticle(ParticleTypes.WITCH, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian(), this.random.nextGaussian(), this.random.nextGaussian());
         }
+    }
+
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return SoundEvents.AXOLOTL_IDLE_AIR;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getHurtSound(DamageSource damageSource) {
+        return SoundEvents.AXOLOTL_HURT;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getDeathSound() {
+        return SoundEvents.AXOLOTL_DEATH;
     }
 
     @Override
