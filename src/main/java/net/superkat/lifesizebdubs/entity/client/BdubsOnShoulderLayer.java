@@ -48,8 +48,8 @@ public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, Playe
                     BdubsEntityRenderer renderer = (BdubsEntityRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(imposterBdubs);
 
                     poseStack.mulPose(Axis.YP.rotationDegrees(180f));
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-                    poseStack.translate(leftShoulder ? 0.4F : -0.4F, livingEntity.isCrouching() ? -0.2F : 0f, 0.0F);
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(180f)); //flip upside to rightside up
+                    poseStack.translate(leftShoulder ? 0.425F : -0.425F, livingEntity.isCrouching() ? -0.35F : -0.15f, 0.07F);
 
                     renderer.defaultRender(poseStack, imposterBdubs, buffer, null, null, netHeadYaw, livingEntity.tickCount, packedLight);
 

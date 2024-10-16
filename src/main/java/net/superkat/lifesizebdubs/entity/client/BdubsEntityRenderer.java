@@ -76,6 +76,29 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
                     head.setRotY(head.getRotY() - netHeadYaw * Mth.DEG_TO_RAD);
                 }
             }
+            setLegRotation(animatable, instanceId, animationState);
+        }
+
+        //leg movement handled by code so it can be added ontop of normal leg movement from animations + i'm lazy to recreate all the animations for sitting
+        private void setLegRotation(BdubsEntity bdubs, long instanceId, AnimationState<BdubsEntity> animState) {
+            GeoBone leftLeg = getAnimationProcessor().getBone("LeftLeg");
+            GeoBone rightLeg = getAnimationProcessor().getBone("RightLeg");
+            float leftLegRotX = leftLeg.getRotX();
+            float rightLegRotX = rightLeg.getRotX();
+            float limbSwing = animState.getLimbSwing();
+            float limbSwingAmount = animState.getLimbSwingAmount();
+
+            if(bdubs.onShoulder) {
+                float sittingRot = (float) Math.toRadians(75);
+                float ticks = bdubs.shoulderRidingPlayer.level().getDayTime();
+                float extraRot = (float) Math.cos((double) ticks / 5f) / 4f;
+                leftLeg.setRotX((float) (leftLegRotX / 2f + sittingRot + extraRot));
+                rightLeg.setRotX((float) (rightLegRotX / 2f + sittingRot - extraRot));
+            } else {
+                //magic numbers from HumanoidModel#setupAnim without multiplying by 1.4f to move less because bdubs has tiny legs lol
+                leftLeg.setRotX((float) (leftLegRotX + (Math.cos(limbSwing * 0.6662f) * limbSwingAmount)));
+                rightLeg.setRotX((float) (rightLegRotX + (Math.cos(limbSwing * 0.6662f + Math.PI) * limbSwingAmount)));
+            }
         }
     }
 }
