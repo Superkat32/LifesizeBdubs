@@ -1,5 +1,14 @@
 {
   "item": "minecraft:moss_block",
+  "messages": [
+    "moss my beloved"
+  ],
   "name": "mossybdubs",
-  "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png"
+  "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
+  "timed_messages": [
+    {
+      "msg": "Uh oh! Time to swheep!",
+      "time": 12500
+    }
+  ]
 }

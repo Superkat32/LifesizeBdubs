@@ -1,5 +1,17 @@
 {
-  "item": "minecraft:clock",
   "name": "bdubs",
-  "texture": "lifesizebdubs:textures/bdubs/bdubs.png"
+  "texture": "lifesizebdubs:textures/bdubs/bdubs.png",
+  "item": "minecraft:clock",
+  "messages": [
+    "Carry on my wayward son",
+    "I'm gonna rip Tango's face off for stealing my horse!",
+    "You can't teach stupid",
+    "ohtiayoyah"
+  ],
+  "timed_messages": [
+    {
+      "msg": "Time to swheep!",
+      "time": 12500
+    }
+  ]
 }

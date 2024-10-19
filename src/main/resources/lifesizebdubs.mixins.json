@@ -9,5 +9,8 @@
   "client": [
     "LivingEntityRendererMixin",
     "PlayerRendererMixin"
+  ],
+  "mixins": [
+    "PlayerMixin"
   ]
 }

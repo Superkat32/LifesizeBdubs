@@ -1,5 +1,6 @@
 package net.superkat.lifesizebdubs;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -31,6 +32,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
 import org.slf4j.Logger;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Mod(LifeSizeBdubs.MODID)
@@ -83,7 +87,9 @@ public class LifeSizeBdubs {
                         bootstrap.register(TEST_VARIANT, new BdubsVariant(
                                 "mossybdubs",
                                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
-                                Items.MOSS_BLOCK.getDefaultInstance()
+                                Items.MOSS_BLOCK.getDefaultInstance(),
+                                List.of("moss my beloved"),
+                                Optional.of(List.of((Pair.of("Uh oh! Time to swheep!", 12500))))
                         ));
                     }
                 ),

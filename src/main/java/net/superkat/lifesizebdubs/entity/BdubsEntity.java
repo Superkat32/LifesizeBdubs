@@ -1,8 +1,11 @@
 package net.superkat.lifesizebdubs.entity;
 
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -28,6 +31,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
+import net.superkat.lifesizebdubs.entity.client.BdubsEntityRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -44,18 +48,32 @@ import java.util.Optional;
 
 public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> SUGAR_TICKS_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     protected final String controller = "default";
     protected static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.idle");
+    protected static final RawAnimation SUGAR_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.sugaridle");
     protected static final RawAnimation WAVE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.wave");
     protected static final RawAnimation CHEER_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.cheer");
+    protected static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.perish");
+    protected static final RawAnimation DESPAWN_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.leave");
+    protected static final RawAnimation GIVEN_SUGAR_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.givensugarohno");
+    protected static final RawAnimation LAUGH_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.laugh");
+    protected static final RawAnimation NOD_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.nod");
+    protected static final RawAnimation BOW_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.yourewelcome");
+    protected static final RawAnimation TADA_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.tada");
 
     public boolean onShoulder = false;
     public LivingEntity shoulderRidingPlayer = null;
+    public int messageTicks = 100;
+    public int sleepMessageTicks;
 
     public int waveTicks = 10;
     public int ticksSinceWave = 0;
+    public int ticksSinceSpyglassWave = 0;
+    public Player spyglassWavedPlayer = null;
+
 
     public BdubsEntity(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {
         super(entityType, level);
@@ -82,6 +100,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_VARIANT_ID, BdubsVariant.getIntFromVariant(BdubsVariant.DEFAULT, this.registryAccess()));
+        builder.define(SUGAR_TICKS_ID, 0);
     }
 
     @Override
@@ -99,6 +118,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         super.addAdditionalSaveData(compound);
         Optional<Holder.Reference<BdubsVariant>> holder = registryAccess().registryOrThrow(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY).getHolder(BdubsVariant.getIntFromVariant(this.getVariant(), this.registryAccess()));
         holder.flatMap(Holder.Reference::unwrapKey).ifPresent(bdubsVariantResourceKey -> compound.putString("variant", bdubsVariantResourceKey.location().toString()));
+
+        compound.putInt("sugarticks", getSugarTicks());
     }
 
     @Override
@@ -108,6 +129,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         if(bdubsVariant != null) {
             this.setVariant(bdubsVariant);
         }
+
+        this.setSugarTicks(compound.getInt("sugarticks"));
     }
 
     @Override
@@ -121,6 +144,14 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         return BdubsVariant.getVariantFromInt(this.entityData.get(DATA_VARIANT_ID), this.registryAccess());
     }
 
+    public void setSugarTicks(int ticks) {
+        this.entityData.set(SUGAR_TICKS_ID, ticks);
+    }
+
+    public int getSugarTicks() {
+        return this.entityData.get(SUGAR_TICKS_ID);
+    }
+
     public void setOnShoulder(boolean onShoulder, LivingEntity player) {
         this.onShoulder = onShoulder;
         this.shoulderRidingPlayer = player;
@@ -129,16 +160,33 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, controller, 5, event -> {
+
+            if(this.dead) {
+                return event.setAndContinue(DEATH_ANIM);
+            }
+
+            if(this.getSugarTicks() > 0) {
+                return event.setAndContinue(SUGAR_IDLE_ANIM);
+            }
             return event.setAndContinue(IDLE_ANIM);
         })
             .triggerableAnim(WAVE_ANIM.toString().toLowerCase(Locale.US), WAVE_ANIM)
             .triggerableAnim(CHEER_ANIM.toString().toLowerCase(Locale.US), CHEER_ANIM)
+            .triggerableAnim(GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US), GIVEN_SUGAR_ANIM)
         );
     }
 
-    public void wave() {
-        if(ticksSinceWave >= 60) {
-            this.triggerAnim(controller, WAVE_ANIM.toString().toLowerCase(Locale.US));
+    public void wave(boolean canCheer) {
+        this.wave(canCheer, false);
+    }
+
+    public void wave(boolean canCheer, boolean overrideTime) {
+        if(ticksSinceWave >= 70 || overrideTime) {
+            if(canCheer && this.getOwner() != null && this.getOwner().getMainHandItem().is(Items.SPYGLASS)) {
+                this.cheer();
+            } else {
+                this.triggerAnim(controller, WAVE_ANIM.toString().toLowerCase(Locale.US));
+            }
             ticksSinceWave = 0;
         }
         waveTicks = this.random.nextInt(100, 1000);
@@ -148,18 +196,33 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         this.triggerAnim(controller, CHEER_ANIM.toString().toLowerCase(Locale.US));
     }
 
+    public void handleMessages() {
+        if(this.getOwner() != null && this.onShoulder) {
+
+        }
+    }
+
+    public void sendMessageToOwner(Component text) {
+        Minecraft.getInstance().player.displayClientMessage(text, false);
+    }
+
+    public void tickAnimation() {
+        waveTicks--;
+        ticksSinceWave++;
+        if(waveTicks <= 0) {
+            wave(true);
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
 
-        waveTicks--;
-        ticksSinceWave++;
-        if(waveTicks <= 0) {
-            if(this.getOwner() != null && this.getOwner().getMainHandItem().is(Items.SPYGLASS)) {
-                cheer();
-            } else {
-                wave();
-            }
+        tickAnimation();
+        handleMessages();
+        int sugarTicks = getSugarTicks();
+        if(sugarTicks > 0) {
+            setSugarTicks(sugarTicks--);
         }
 
         if(!this.level().isClientSide) {
@@ -180,11 +243,15 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                                 return !entity.isSpectator();
                                     }, 0f);
                             if(entityHitResult != null && entityHitResult.getEntity() == this && serverPlayer.hasLineOfSight(this)) {
-                                wave();
+                                if(serverPlayer != this.spyglassWavedPlayer || (ticksSinceSpyglassWave >= 300 || serverPlayer.getTicksUsingItem() <= 40)) {
+                                    this.spyglassWavedPlayer = serverPlayer;
+                                    wave(false);
+                                }
                             }
                         }
                     }
                 }
+
             }
         }
     }
@@ -196,6 +263,19 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         boolean isOwner = hasOwner && player == this.getOwner();
         boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
+
+        if(itemStack.is(Items.SUGAR)) {
+            //TODO - handle variant item possibly being sugar
+            itemStack.consume(1, player);
+            this.setSugarTicks(1200); //1 minute
+            this.triggerAnim(controller, GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US));
+            this.spawnEvenFunnierParticles();
+            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.AMBIENT, 2, 1);
+            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_CHARGE, SoundSource.AMBIENT, 1f, 1.25f);
+            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.AMBIENT, 1f, 1.25f);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+
         if(newVariant != null && newVariant != this.getVariant()) {
             itemStack.consume(1, player);
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
@@ -203,6 +283,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_AMBIENT_WITH_ITEM, SoundSource.AMBIENT);
             if(hadItem || newVariant != this.getVariant()) {
                 spawnFunnyParticles();
+                this.wave(true, true);
             }
             this.setVariant(newVariant);
             return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -218,9 +299,18 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void spawnFunnyParticles() {
         for (int i = 0; i < 7; i++) {
             this.level().addParticle(ParticleTypes.END_ROD, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 4, this.random.nextGaussian() / 8, this.random.nextGaussian() / 4);
-            this.level().addParticle(ParticleTypes.GLOW_SQUID_INK, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 4, this.random.nextGaussian() / 8, this.random.nextGaussian() / 4);
-            this.level().addParticle(ParticleTypes.WITCH, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian(), this.random.nextGaussian(), this.random.nextGaussian());
+            this.level().addParticle(ParticleTypes.WAX_OFF, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() * 8, this.random.nextGaussian(), this.random.nextGaussian() * 8);
+            this.level().addParticle(ParticleTypes.WHITE_SMOKE, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 2, this.random.nextGaussian() / 8, this.random.nextGaussian() / 2);
         }
+    }
+
+    public void spawnEvenFunnierParticles() {
+        for (int i = 0; i < 7; i++) {
+            this.level().addParticle(ParticleTypes.END_ROD, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 4, this.random.nextGaussian() / 8, this.random.nextGaussian() / 4);
+            this.level().addParticle(ParticleTypes.WAX_OFF, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() * 8, this.random.nextGaussian() * 4, this.random.nextGaussian() * 8);
+            this.level().addParticle(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 24, 0.01, this.random.nextGaussian() / 24);
+        }
+        this.level().addParticle(ParticleTypes.SONIC_BOOM, this.getX(), this.getEyeY(), this.getZ(), 0, 0, 0);
     }
 
     @Override

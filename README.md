@@ -1,25 +1,33 @@
+# Life Size Bdubs
+## Befriend your own life size Bdubs!
+#### Made for Modfest 1.21!
+Ever get tired of being by yourself? Ever wish you could have your own little BDoubleO100 friend? Well now you can!
 
-Installation information
-=======
+## Adding your own life size friend!
+Adding your own life size friend is so easy, even Scar could do it(probably)!
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+#### Add your own texture
+Likely in the path `data/<datapack name>/bdubs/<variant texture name>.png`
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+#### Adding the json file
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+In file path 
+``data/<datapack name>/lifesizebdubs/bdubs_variant/<your variant name>.json``
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
-
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+```json <your bdubs variant name>.json
+{
+  "item": "<item here (e.g. minecraft:clock)>",
+  "name": "<variant name here (e.g. bdubs)>",
+  "texture": "<texture here (your added texture path from earlier)",
+  "messages": [
+    "<message 1>",
+    "<message 2>"
+  ],
+  "timed_messages": [
+    {
+      "msg": "<message>",
+      "time": <time of day> (anywhere from 0 through 24000 - e.g. 12500)
+    }
+  ]
+}
+```

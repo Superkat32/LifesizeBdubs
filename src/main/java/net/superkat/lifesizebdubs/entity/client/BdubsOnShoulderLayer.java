@@ -11,12 +11,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
-import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
+import net.superkat.lifesizebdubs.entity.BdubsShoulderHandler;
 
 public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, PlayerModel<T>> {
-    private BdubsEntity imposterBdubsLeft = null;
-    private BdubsEntity imposterBdubsRight = null;
+//    private BdubsEntity imposterBdubsLeft = null;
+//    private BdubsEntity imposterBdubsRight = null;
     public BdubsOnShoulderLayer(RenderLayerParent<T, PlayerModel<T>> renderer) {
         super(renderer);
     }
@@ -33,35 +33,43 @@ public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, Playe
         EntityType.byString(compoundTag.getString("id"))
                 .filter(entityType -> entityType == LifeSizeBdubs.BDUBS_ENTITY.get())
                 .ifPresentOrElse(entityType -> {
-                    BdubsEntity imposterBdubs = leftShoulder ? imposterBdubsLeft : imposterBdubsRight;
+//                    BdubsEntity imposterBdubs = leftShoulder ? imposterBdubsLeft : imposterBdubsRight;
                     poseStack.pushPose();
-                    BdubsVariant bdubsVariant = BdubsVariant.getVariantFromCompoundTag(compoundTag, livingEntity.registryAccess());
-                    if(bdubsVariant == null) {
-                        bdubsVariant = BdubsVariant.DEFAULT;
+//                    BdubsVariant bdubsVariant = BdubsVariant.getVariantFromCompoundTag(compoundTag, livingEntity.registryAccess());
+//                    if(bdubsVariant == null) {
+//                        bdubsVariant = BdubsVariant.DEFAULT;
+//                    }
+//                    if(imposterBdubs == null) {
+//                        imposterBdubs = (BdubsEntity) EntityType.create(compoundTag, livingEntity.level()).get();
+//                        imposterBdubs.setVariant(bdubsVariant);
+//                        imposterBdubs.setOnShoulder(true, livingEntity);
+//                    }
+
+                    BdubsEntity imposterBdubs = BdubsShoulderHandler.getImposterBdubs(leftShoulder);
+                    if(imposterBdubs != null) {
+                        BdubsEntityRenderer renderer = (BdubsEntityRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(imposterBdubs);
+
+                        poseStack.mulPose(Axis.YP.rotationDegrees(180f));
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(180f)); //flip upside to rightside up
+                        poseStack.translate(leftShoulder ? 0.425F : -0.425F, livingEntity.isCrouching() ? -0.35F : -0.15f, 0.07F);
+
+                        if(imposterBdubs.getSugarTicks() > 0) {
+                            double ticks = (double) livingEntity.level().getDayTime();
+                            poseStack.mulPose(Axis.YP.rotationDegrees((float) (ticks * -75f)));
+                        }
+
+                        renderer.defaultRender(poseStack, imposterBdubs, buffer, null, null, netHeadYaw, livingEntity.tickCount, packedLight);
                     }
-                    if(imposterBdubs == null) {
-                        imposterBdubs = (BdubsEntity) EntityType.create(compoundTag, livingEntity.level()).get();
-                        imposterBdubs.setVariant(bdubsVariant);
-                        imposterBdubs.setOnShoulder(true, livingEntity);
-                    }
-
-                    BdubsEntityRenderer renderer = (BdubsEntityRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(imposterBdubs);
-
-                    poseStack.mulPose(Axis.YP.rotationDegrees(180f));
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(180f)); //flip upside to rightside up
-                    poseStack.translate(leftShoulder ? 0.425F : -0.425F, livingEntity.isCrouching() ? -0.35F : -0.15f, 0.07F);
-
-                    renderer.defaultRender(poseStack, imposterBdubs, buffer, null, null, netHeadYaw, livingEntity.tickCount, packedLight);
 
                     poseStack.popPose();
 
                     //cache entity I guess maybe perhaps perchance
                     //cursed if else statements but it works?
-                    if(leftShoulder) imposterBdubsLeft = imposterBdubs;
-                    else imposterBdubsRight = imposterBdubs;
+//                    if(leftShoulder) imposterBdubsLeft = imposterBdubs;
+//                    else imposterBdubsRight = imposterBdubs;
                 }, () -> {
-                    if(leftShoulder) imposterBdubsLeft = null;
-                    else imposterBdubsRight = null;
+//                    if(leftShoulder) imposterBdubsLeft = null;
+//                    else imposterBdubsRight = null;
                 });
     }
 }
