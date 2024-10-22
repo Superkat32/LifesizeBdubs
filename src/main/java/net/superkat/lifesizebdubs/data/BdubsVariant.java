@@ -36,10 +36,10 @@ public record BdubsVariant(String name, ResourceLocation texture, ItemStack item
     public static final Codec<Holder<BdubsVariant>> CODEC = RegistryFileCodec.create(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY, DIRECT_CODEC);
 
     public static BdubsVariant DEFAULT = new BdubsVariant(
-            "bdubs",
+            "Life-Size Bdubs",
             ResourceLocation.fromNamespaceAndPath(LifeSizeBdubs.MODID, "textures/bdubs/bdubs.png"),
             Items.CLOCK.getDefaultInstance(),
-            List.of("Carry on my wayward son", "I'm gonna rip Tango's face off for stealing my horse!"),
+            List.of("I'm gonna rip Tango's face off for stealing my horse!"),
             Optional.of(List.of((Pair.of("Time to swheep!", 12500))))
     );
 

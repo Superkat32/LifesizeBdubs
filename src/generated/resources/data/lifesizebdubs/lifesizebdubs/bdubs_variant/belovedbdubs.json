@@ -1,9 +1,9 @@
 {
   "item": "minecraft:moss_block",
   "messages": [
-    "moss my beloved"
+    "Moss my beloved"
   ],
-  "name": "mossybdubs",
+  "name": "Life-Size Mossy Bdubs",
   "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
   "timed_messages": [
     {

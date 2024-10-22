@@ -1,7 +1,6 @@
 package net.superkat.lifesizebdubs.entity;
 
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -31,17 +30,15 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
-import net.superkat.lifesizebdubs.entity.client.BdubsEntityRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.ClientUtil;
 import software.bernie.geckolib.util.GeckoLibUtil;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -49,6 +46,7 @@ import java.util.Optional;
 public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SUGAR_TICKS_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
+//    private static final EntityDataAccessor<Boolean> SHOWCASE_MODE_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     protected final String controller = "default";
@@ -57,18 +55,23 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     protected static final RawAnimation WAVE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.wave");
     protected static final RawAnimation CHEER_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.cheer");
     protected static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.perish");
-    protected static final RawAnimation DESPAWN_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.leave");
+    protected static final RawAnimation DESPAWN_ANIM = RawAnimation.begin().thenPlayAndHold("animation.bdubs.leave");
     protected static final RawAnimation GIVEN_SUGAR_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.givensugarohno");
     protected static final RawAnimation LAUGH_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.laugh");
     protected static final RawAnimation NOD_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.nod");
     protected static final RawAnimation BOW_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.yourewelcome");
     protected static final RawAnimation TADA_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.tada");
+    protected static final RawAnimation SMOOTH_DANCE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.smooth");
+    public static List<RawAnimation> IDLE_ANIMS = List.of(WAVE_ANIM, CHEER_ANIM, GIVEN_SUGAR_ANIM, LAUGH_ANIM, NOD_ANIM, BOW_ANIM, TADA_ANIM, SMOOTH_DANCE_ANIM);
+
+    public int ownerInteractionTicks = 0;
 
     public boolean onShoulder = false;
     public LivingEntity shoulderRidingPlayer = null;
-    public int messageTicks = 100;
-    public int sleepMessageTicks;
+    public String lastMessage = "";
+    public int messageTicks = 1200;
 
+    public int idleAnimTicks = 300;
     public int waveTicks = 10;
     public int ticksSinceWave = 0;
     public int ticksSinceSpyglassWave = 0;
@@ -137,6 +140,12 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void setVariant(@NotNull BdubsVariant variant) {
         int id = BdubsVariant.getIntFromVariant(variant, this.registryAccess());
         this.entityData.set(DATA_VARIANT_ID, id);
+
+        if(this.getOwner() != null) {
+//            Component name = Component.translatable("entity.lifesizebdubs.name", this.getOwner().getDisplayName(), this.getVariant().name());
+//            this.setCustomName(name);
+            ownerInteractionTicks = 0;
+        }
     }
 
     @Override @NotNull
@@ -159,8 +168,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, controller, 5, event -> {
 
+        AnimationController<BdubsEntity> animController = new AnimationController<>(this, controller, 5, event -> {
             if(this.dead) {
                 return event.setAndContinue(DEATH_ANIM);
             }
@@ -169,11 +178,39 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                 return event.setAndContinue(SUGAR_IDLE_ANIM);
             }
             return event.setAndContinue(IDLE_ANIM);
-        })
-            .triggerableAnim(WAVE_ANIM.toString().toLowerCase(Locale.US), WAVE_ANIM)
-            .triggerableAnim(CHEER_ANIM.toString().toLowerCase(Locale.US), CHEER_ANIM)
-            .triggerableAnim(GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US), GIVEN_SUGAR_ANIM)
-        );
+        });
+
+        //cheat haha
+        for (RawAnimation idleAnim : IDLE_ANIMS) {
+            animController.triggerableAnim(idleAnim.toString().toLowerCase(Locale.US), idleAnim);
+            if(idleAnim == LAUGH_ANIM) {
+                animController.setSoundKeyframeHandler(event -> {
+                    Player player = ClientUtil.getClientPlayer();
+
+                    if(player != null) {
+                        player.playSound(SoundEvents.VEX_AMBIENT);
+                    }
+                });
+            }
+        }
+
+        animController.triggerableAnim(DESPAWN_ANIM.toString().toLowerCase(Locale.US), DESPAWN_ANIM);
+
+        controllers.add(animController);
+    }
+
+    public void playIdleAnim() {
+        int idleIndex = this.random.nextInt(IDLE_ANIMS.size());
+        RawAnimation idleAnim = IDLE_ANIMS.get(idleIndex);
+        if(idleAnim == WAVE_ANIM) {
+            this.wave(false);
+        } else {
+            //don't play animation if a triggered animation(likely idle) is already playing
+            if(!this.getAnimatableInstanceCache().getManagerForId(this.getId()).getAnimationControllers().get(controller).isPlayingTriggeredAnimation()) {
+                this.triggerAnim(controller, idleAnim.toString().toLowerCase(Locale.US));
+            }
+        }
+        this.idleAnimTicks = this.random.nextInt(200, 1000);
     }
 
     public void wave(boolean canCheer) {
@@ -185,31 +222,70 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             if(canCheer && this.getOwner() != null && this.getOwner().getMainHandItem().is(Items.SPYGLASS)) {
                 this.cheer();
             } else {
+                if(overrideTime) {
+                    this.getAnimatableInstanceCache().getManagerForId(this.getId()).getAnimationControllers().get(controller).forceAnimationReset();
+                }
                 this.triggerAnim(controller, WAVE_ANIM.toString().toLowerCase(Locale.US));
             }
             ticksSinceWave = 0;
         }
-        waveTicks = this.random.nextInt(100, 1000);
     }
 
     public void cheer() {
         this.triggerAnim(controller, CHEER_ANIM.toString().toLowerCase(Locale.US));
     }
 
-    public void handleMessages() {
+    //likely called serverside
+    public void tickMessages() {
         if(this.getOwner() != null && this.onShoulder) {
+            BdubsVariant variant = this.getVariant();
+            List<String> messages = variant.messages();
+            messageTicks--;
+            if(messageTicks <= 0 && !messages.isEmpty()) {
+                int msgIndex = this.random.nextInt(messages.size());
+                String message = messages.get(msgIndex);
+                if(message != null && !message.isEmpty()) {
+                    sendMessageToOwner(message);
+                }
+                messageTicks = this.random.nextInt(6000, 8400); //5-7 minutes
+            }
+
+            int time = (int) this.level().getDayTime();
+            //yeah okay that works I guess
+            Optional<List<Pair<String, Integer>>> optionalTimedMessages = variant.timedMessages();
+            if(optionalTimedMessages.isPresent()) {
+                List<Pair<String, Integer>> timedMessages = optionalTimedMessages.get();
+                for (Pair<String, Integer> timedMessage : timedMessages) {
+                    if(timedMessage.getSecond() == time) {
+                        String msg = timedMessage.getFirst();
+                        if(msg != null && !msg.isEmpty()) {
+                            sendMessageToOwner(msg);
+                        }
+                    }
+                }
+            }
 
         }
     }
 
-    public void sendMessageToOwner(Component text) {
-        Minecraft.getInstance().player.displayClientMessage(text, false);
+    public void sendMessageToOwner(String message) {
+        if(message.equals(lastMessage)) return;
+        if(this.getOwner() instanceof ServerPlayer owner) {
+            //TODO - translatable messages?
+            Component sentMessage = Component.translatable("lifesizebdubs.funnybdubsmessage", getVariant().name(), message);
+            owner.displayClientMessage(sentMessage, false);
+            lastMessage = message;
+        }
     }
 
     public void tickAnimation() {
+        idleAnimTicks--;
         waveTicks--;
         ticksSinceWave++;
-        if(waveTicks <= 0) {
+        if(idleAnimTicks <= 0) {
+            playIdleAnim();
+        }
+        if(waveTicks == 0) {
             wave(true);
         }
     }
@@ -218,13 +294,22 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void tick() {
         super.tick();
 
-        tickAnimation();
-        handleMessages();
-        int sugarTicks = getSugarTicks();
-        if(sugarTicks > 0) {
-            setSugarTicks(sugarTicks--);
+        ownerInteractionTicks++;
+        if(ownerInteractionTicks >= 6000) { //5 minutes
+            triggerAnim(controller, DESPAWN_ANIM.toString().toLowerCase(Locale.US));
+            if(ownerInteractionTicks >= 6045) {
+                this.discard();
+            }
+        } else {
+            //don't allow idle animations to play while despawning
+            tickAnimation();
+            int sugarTicks = getSugarTicks();
+            if(sugarTicks > 0) {
+                setSugarTicks(sugarTicks - 1);
+            }
         }
 
+        //wave to spyglass :)
         if(!this.level().isClientSide) {
             if(ticksSinceWave >= 20) {
                 List<Player> spyglassUsingPlayers = this.level().getNearbyPlayers(
@@ -265,15 +350,24 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
 
         if(itemStack.is(Items.SUGAR)) {
-            //TODO - handle variant item possibly being sugar
-            itemStack.consume(1, player);
-            this.setSugarTicks(1200); //1 minute
-            this.triggerAnim(controller, GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US));
-            this.spawnEvenFunnierParticles();
-            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.AMBIENT, 2, 1);
-            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_CHARGE, SoundSource.AMBIENT, 1f, 1.25f);
-            this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.AMBIENT, 1f, 1.25f);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            boolean giveSugar;
+            boolean newVariantItemIsSugar = newVariant != null && newVariant.item().is(itemStack.getItem());
+            if(newVariantItemIsSugar) {
+                giveSugar = newVariant.equals(this.getVariant()); //give sugar if new variant
+            } else {
+                giveSugar = true;
+            }
+
+            if(giveSugar) {
+                itemStack.consume(1, player);
+                this.setSugarTicks(1200); //1 minute
+                this.triggerAnim(controller, GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US));
+                this.spawnEvenFunnierParticles();
+                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.AMBIENT, 2, 1);
+                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_CHARGE, SoundSource.AMBIENT, 1f, 1.25f);
+                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.AMBIENT, 1f, 1.25f);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
         }
 
         if(newVariant != null && newVariant != this.getVariant()) {
@@ -288,8 +382,9 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.setVariant(newVariant);
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
-        if(isOwner && hadItem) {
+        if(isOwner && hadItem && !itemStack.is(Items.SPYGLASS)) {
             if(player instanceof ServerPlayer serverPlayer) {
+                ownerInteractionTicks = 0;
                 this.setEntityOnShoulder(serverPlayer);
             }
         }

@@ -1,13 +1,10 @@
 {
-  "name": "bdubs",
-  "texture": "lifesizebdubs:textures/bdubs/bdubs.png",
   "item": "minecraft:clock",
   "messages": [
-    "Carry on my wayward son",
-    "I'm gonna rip Tango's face off for stealing my horse!",
-    "You can't teach stupid",
-    "ohtiayoyah"
+    "I'm gonna rip Tango's face off for stealing my horse!"
   ],
+  "name": "Life-Size Bdubs",
+  "texture": "lifesizebdubs:textures/bdubs/bdubs.png",
   "timed_messages": [
     {
       "msg": "Time to swheep!",

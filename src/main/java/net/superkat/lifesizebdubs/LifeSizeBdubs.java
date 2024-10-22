@@ -85,10 +85,10 @@ public class LifeSizeBdubs {
                     BDUBS_VARIANT_REGISTRY_KEY, bootstrap -> {
                         bootstrap.register(BDUBS_DEFAULT_VARIANT, BdubsVariant.DEFAULT);
                         bootstrap.register(TEST_VARIANT, new BdubsVariant(
-                                "mossybdubs",
+                                "Life-Size Mossy Bdubs",
                                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
                                 Items.MOSS_BLOCK.getDefaultInstance(),
-                                List.of("moss my beloved"),
+                                List.of("Moss my beloved"),
                                 Optional.of(List.of((Pair.of("Uh oh! Time to swheep!", 12500))))
                         ));
                     }

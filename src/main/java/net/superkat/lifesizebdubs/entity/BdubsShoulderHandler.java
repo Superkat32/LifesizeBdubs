@@ -41,7 +41,8 @@ public class BdubsShoulderHandler {
                     BdubsEntity imposterBdubs = getAndSetImposterBdubs(compoundTag, player, left);
 
                     if(imposterBdubs != null) {
-                        imposterBdubs.tickAnimation();
+                        //likely serverside
+                        imposterBdubs.tickMessages();
                     }
 
                     //cache entity I guess maybe perhaps perchance
