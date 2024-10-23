@@ -2,7 +2,11 @@
   "itemGroup.examplemod": "Example Mod Tab",
   "block.examplemod.example_block": "Example Block",
   "item.examplemod.example_item": "Example Item",
+
+  "lifesizebdubs.variant.bdubs": "Life-Size Bdubs",
+  "lifesizebdubs.variant.mossy": "Life-Size Mossy Bdubs",
+
   "entity.lifesizebdubs.bdubsentity": "Lifesized Bdubs",
-  "lifesizebdubs.funnybdubsmessage": "[%1$s]: %2$s",
+  "entity.lifesizebdubs.funnybdubsmessage": "[%1$s]: %2$s",
   "entity.lifesizebdubs.name": "%1$s's %2$s"
 }

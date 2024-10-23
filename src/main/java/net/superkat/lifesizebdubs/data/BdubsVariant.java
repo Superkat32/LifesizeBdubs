@@ -7,6 +7,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,10 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public record BdubsVariant(String name, ResourceLocation texture, ItemStack item, List<String> messages, Optional<List<Pair<String, Integer>>> timedMessages) {
+public record BdubsVariant(Component name, ResourceLocation texture, ItemStack item, List<String> messages, Optional<List<Pair<String, Integer>>> timedMessages) {
     public static final Codec<BdubsVariant> DIRECT_CODEC = RecordCodecBuilder.create(instance -> {
         return instance.group(
-                Codec.STRING.fieldOf("name").forGetter(BdubsVariant::name),
+                ComponentSerialization.CODEC.fieldOf("name").forGetter(BdubsVariant::name),
                 ResourceLocation.CODEC.fieldOf("texture").forGetter(BdubsVariant::texture),
                 ItemStack.SIMPLE_ITEM_CODEC.fieldOf("item").forGetter(BdubsVariant::item),
                 Codec.STRING.listOf().fieldOf("messages").forGetter(BdubsVariant::messages),
@@ -36,7 +38,7 @@ public record BdubsVariant(String name, ResourceLocation texture, ItemStack item
     public static final Codec<Holder<BdubsVariant>> CODEC = RegistryFileCodec.create(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY, DIRECT_CODEC);
 
     public static BdubsVariant DEFAULT = new BdubsVariant(
-            "Life-Size Bdubs",
+            Component.translatable("lifesizebdubs.variant.bdubs"),
             ResourceLocation.fromNamespaceAndPath(LifeSizeBdubs.MODID, "textures/bdubs/bdubs.png"),
             Items.CLOCK.getDefaultInstance(),
             DefaultBdubsMessages.DEFAULT_BDUBS_VARIANT_MESSAGES,

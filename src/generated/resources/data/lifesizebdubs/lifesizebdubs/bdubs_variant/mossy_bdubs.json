@@ -1,10 +1,12 @@
 {
+  "name": {
+    "translate": "lifesizebdubs.variant.mossy"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
   "item": "minecraft:moss_block",
   "messages": [
     "Moss my beloved"
   ],
-  "name": "Life-Size Mossy Bdubs",
-  "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
   "timed_messages": [
     {
       "msg": "Uh oh! Time to swheep!",

@@ -16,8 +16,8 @@ In file path
 
 ```json <your bdubs variant name>.json
 {
-  "item": "<item here (e.g. minecraft:clock)>",
   "name": "<variant name here (e.g. bdubs)>",
+  "item": "<item here (e.g. minecraft:clock)>",
   "texture": "<texture here (your added texture path from earlier)",
   "messages": [
     "<message 1>",

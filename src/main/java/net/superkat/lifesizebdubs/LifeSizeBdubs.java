@@ -2,12 +2,11 @@ package net.superkat.lifesizebdubs;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataProvider;
-import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -43,8 +42,8 @@ public class LifeSizeBdubs {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final ResourceKey<Registry<BdubsVariant>> BDUBS_VARIANT_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MODID, "bdubs_variant"));
-    public static final ResourceKey<BdubsVariant> BDUBS_DEFAULT_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "mybdubs"));
-    public static final ResourceKey<BdubsVariant> TEST_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "belovedbdubs"));
+    public static final ResourceKey<BdubsVariant> BDUBS_DEFAULT_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "bdubs"));
+    public static final ResourceKey<BdubsVariant> BDUBS_MOSSY_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "mossy_bdubs"));
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     public static final DeferredHolder<EntityType<?>, EntityType<BdubsEntity>> BDUBS_ENTITY = registerEntity("bdubsentity", BdubsEntity::new, 0.5f, 0.5f);
@@ -84,8 +83,8 @@ public class LifeSizeBdubs {
                 .add(
                     BDUBS_VARIANT_REGISTRY_KEY, bootstrap -> {
                         bootstrap.register(BDUBS_DEFAULT_VARIANT, BdubsVariant.DEFAULT);
-                        bootstrap.register(TEST_VARIANT, new BdubsVariant(
-                                "Life-Size Mossy Bdubs",
+                        bootstrap.register(BDUBS_MOSSY_VARIANT, new BdubsVariant(
+                                Component.translatable("lifesizebdubs.variant.mossy"),
                                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
                                 Items.MOSS_BLOCK.getDefaultInstance(),
                                 List.of("Moss my beloved"),

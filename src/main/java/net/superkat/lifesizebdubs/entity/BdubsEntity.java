@@ -280,20 +280,6 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                     }
                 }
 
-//                int msgIndex = this.random.nextInt(messages.size());
-//                String message = messages.get(msgIndex);
-//                if(message != null && !message.isEmpty()) {
-//                    boolean sendMessage = !lastMessages.contains(message);
-//                    int maxLastMessages = variant.messages().size() > 5 ? 5 : variant.messages().size() - 1;
-//
-//                    if(sendMessage) {
-//                        sendMessageToOwner(message);
-//                        lastMessages.add(0, message);
-//                        if(lastMessages.size() > maxLastMessages) {
-//                            lastMessages.removeLast();
-//                        }
-//                    }
-//                }
                 messageTicks = this.random.nextInt(6000, 8400); //5-7 minutes
             }
 
@@ -329,8 +315,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
     public void sendMessageToOwner(String message) {
         if(this.getOwner() instanceof ServerPlayer owner) {
-            //TODO - translatable messages?
-            Component sentMessage = Component.translatable("lifesizebdubs.funnybdubsmessage", getVariant().name(), message);
+            Component sentMessage = Component.translatable("entity.lifesizebdubs.funnybdubsmessage", getVariant().name(), message);
             owner.displayClientMessage(sentMessage, false);
         }
     }
