@@ -39,7 +39,7 @@ public record BdubsVariant(String name, ResourceLocation texture, ItemStack item
             "Life-Size Bdubs",
             ResourceLocation.fromNamespaceAndPath(LifeSizeBdubs.MODID, "textures/bdubs/bdubs.png"),
             Items.CLOCK.getDefaultInstance(),
-            List.of("I'm gonna rip Tango's face off for stealing my horse!"),
+            DefaultBdubsMessages.DEFAULT_BDUBS_VARIANT_MESSAGES,
             Optional.of(List.of((Pair.of("Time to swheep!", 12500))))
     );
 

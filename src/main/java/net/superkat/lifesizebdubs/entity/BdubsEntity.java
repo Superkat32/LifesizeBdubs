@@ -30,6 +30,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
+import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -46,7 +47,7 @@ import java.util.Optional;
 public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SUGAR_TICKS_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
-//    private static final EntityDataAccessor<Boolean> SHOWCASE_MODE_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOWCASE_MODE_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     protected final String controller = "default";
@@ -68,8 +69,10 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
     public boolean onShoulder = false;
     public LivingEntity shoulderRidingPlayer = null;
-    public String lastMessage = "";
     public int messageTicks = 1200;
+    public List<String> lastMessages = Lists.newArrayList();
+    public String lastTimedMessage = "";
+    public int lastMessageTicks = 0;
 
     public int idleAnimTicks = 300;
     public int waveTicks = 10;
@@ -95,15 +98,11 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     }
 
     @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
-        return null;
-    }
-
-    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_VARIANT_ID, BdubsVariant.getIntFromVariant(BdubsVariant.DEFAULT, this.registryAccess()));
         builder.define(SUGAR_TICKS_ID, 0);
+        builder.define(SHOWCASE_MODE_ID, false);
     }
 
     @Override
@@ -123,6 +122,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         holder.flatMap(Holder.Reference::unwrapKey).ifPresent(bdubsVariantResourceKey -> compound.putString("variant", bdubsVariantResourceKey.location().toString()));
 
         compound.putInt("sugarticks", getSugarTicks());
+        compound.putBoolean("showcaseMode", isShowcaseMode());
     }
 
     @Override
@@ -134,6 +134,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         }
 
         this.setSugarTicks(compound.getInt("sugarticks"));
+        this.setShowcaseMode(compound.getBoolean("showcaseMode"));
     }
 
     @Override
@@ -159,6 +160,16 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
     public int getSugarTicks() {
         return this.entityData.get(SUGAR_TICKS_ID);
+    }
+
+    public void setShowcaseMode(boolean showcaseMode) {
+        this.entityData.set(SHOWCASE_MODE_ID, showcaseMode);
+        this.setInvulnerable(showcaseMode);
+        this.setNoAi(showcaseMode);
+    }
+
+    public boolean isShowcaseMode() {
+        return this.entityData.get(SHOWCASE_MODE_ID);
     }
 
     public void setOnShoulder(boolean onShoulder, LivingEntity player) {
@@ -240,13 +251,49 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         if(this.getOwner() != null && this.onShoulder) {
             BdubsVariant variant = this.getVariant();
             List<String> messages = variant.messages();
+
             messageTicks--;
+            lastMessageTicks++;
+
             if(messageTicks <= 0 && !messages.isEmpty()) {
-                int msgIndex = this.random.nextInt(messages.size());
-                String message = messages.get(msgIndex);
-                if(message != null && !message.isEmpty()) {
-                    sendMessageToOwner(message);
+                String sentMessage = null;
+                for (int i = 0; i < 10; i++) {
+                    //get random message
+                    int msgIndex = this.random.nextInt(messages.size());
+                    String message = messages.get(msgIndex);
+                    if(message != null && !message.isEmpty()) {
+                        //check if message has been sent recently
+                        boolean sentRecently = lastMessages.contains(message);
+                        if(!sentRecently) {
+                            sentMessage = message;
+                            break;
+                        }
+                    }
                 }
+
+                if(sentMessage != null) {
+                    sendMessageToOwner(sentMessage);
+                    lastMessages.addFirst(sentMessage);
+                    int maxLastMessages = variant.messages().size() > 5 ? 5 : variant.messages().size() - 1;
+                    if(lastMessages.size() > maxLastMessages) {
+                        lastMessages.removeLast();
+                    }
+                }
+
+//                int msgIndex = this.random.nextInt(messages.size());
+//                String message = messages.get(msgIndex);
+//                if(message != null && !message.isEmpty()) {
+//                    boolean sendMessage = !lastMessages.contains(message);
+//                    int maxLastMessages = variant.messages().size() > 5 ? 5 : variant.messages().size() - 1;
+//
+//                    if(sendMessage) {
+//                        sendMessageToOwner(message);
+//                        lastMessages.add(0, message);
+//                        if(lastMessages.size() > maxLastMessages) {
+//                            lastMessages.removeLast();
+//                        }
+//                    }
+//                }
                 messageTicks = this.random.nextInt(6000, 8400); //5-7 minutes
             }
 
@@ -259,7 +306,19 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                     if(timedMessage.getSecond() == time) {
                         String msg = timedMessage.getFirst();
                         if(msg != null && !msg.isEmpty()) {
-                            sendMessageToOwner(msg);
+                            boolean sendMessage = false;
+                            boolean isPreviousTimedMessage = !lastTimedMessage.isEmpty() && msg.equals(lastTimedMessage);
+                            if(isPreviousTimedMessage) {
+                                sendMessage = lastMessageTicks >= 20;
+                            } else {
+                                sendMessage = true;
+                            }
+
+                            if(sendMessage) {
+                                sendMessageToOwner(msg);
+                                lastTimedMessage = msg;
+                                lastMessageTicks = 0;
+                            }
                         }
                     }
                 }
@@ -269,12 +328,10 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     }
 
     public void sendMessageToOwner(String message) {
-        if(message.equals(lastMessage)) return;
         if(this.getOwner() instanceof ServerPlayer owner) {
             //TODO - translatable messages?
             Component sentMessage = Component.translatable("lifesizebdubs.funnybdubsmessage", getVariant().name(), message);
             owner.displayClientMessage(sentMessage, false);
-            lastMessage = message;
         }
     }
 
@@ -349,7 +406,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
 
-        if(itemStack.is(Items.SUGAR)) {
+        if(itemStack.is(Items.SUGAR) && !isShowcaseMode()) {
             boolean giveSugar;
             boolean newVariantItemIsSugar = newVariant != null && newVariant.item().is(itemStack.getItem());
             if(newVariantItemIsSugar) {
@@ -371,6 +428,10 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         }
 
         if(newVariant != null && newVariant != this.getVariant()) {
+            if(isShowcaseMode() && this.getOwner() != null) {
+                //only let owner do things
+                if(!player.equals(this.getOwner())) return InteractionResult.PASS;
+            }
             itemStack.consume(1, player);
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
             this.setOwnerUUID(player.getUUID());
@@ -382,7 +443,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.setVariant(newVariant);
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
-        if(isOwner && hadItem && !itemStack.is(Items.SPYGLASS)) {
+
+        if(isOwner && hadItem && !itemStack.is(Items.SPYGLASS) && !isShowcaseMode()) {
             if(player instanceof ServerPlayer serverPlayer) {
                 ownerInteractionTicks = 0;
                 this.setEntityOnShoulder(serverPlayer);
@@ -431,5 +493,10 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     @Override
     public boolean isFood(ItemStack stack) {
         return false;
+    }
+
+    @Override
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
+        return null;
     }
 }
