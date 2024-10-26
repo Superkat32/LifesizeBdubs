@@ -4,15 +4,19 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,11 +28,16 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
+import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
 import org.slf4j.Logger;
 
@@ -48,6 +57,13 @@ public class LifeSizeBdubs {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     public static final DeferredHolder<EntityType<?>, EntityType<BdubsEntity>> BDUBS_ENTITY = registerEntity("bdubsentity", BdubsEntity::new, 0.5f, 0.5f);
 
+    //TODO - Test on multiplayer
+    //TODO - Config option to disable messages (requires custom packet)?
+    //TODO - custom icon
+    //TODO - tnt bdubs
+    //TODO - Scar(Enchanter), Etho(Ladder), Grian(?)?
+    //TODO - (after upload) wiki
+
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
         ENTITIES.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
@@ -60,6 +76,8 @@ public class LifeSizeBdubs {
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(this::allowLockingShoulderEntities);
+        NeoForge.EVENT_BUS.addListener(this::tickLastLockingShoulderEntity);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -94,6 +112,46 @@ public class LifeSizeBdubs {
                 ),
                 Set.of(MODID)
         ));
+    }
+
+    @SubscribeEvent
+    public void allowLockingShoulderEntities(PlayerInteractEvent.RightClickItem event) {
+        Player player = event.getEntity();
+        if(event.getItemStack().is(Items.SLIME_BALL)) {
+            if(!player.getShoulderEntityLeft().isEmpty() || !player.getShoulderEntityRight().isEmpty()) {
+                LifeSizeBdubsPlayer bdubsPlayer = (LifeSizeBdubsPlayer) player;
+                if(bdubsPlayer.lifesizebdubs$lastLockTicks() <= 20) return;
+                boolean locked = bdubsPlayer.lifesizebdubs$lockedShoulderEntity();
+                boolean newLocked = !locked;
+                bdubsPlayer.lifesizebdubs$setLockedShoulderEntity(newLocked);
+                if(newLocked) {
+                    if(player.level().isClientSide) {
+                        player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderlocked"), true);
+                    }
+                    player.playNotifySound(SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 1f, 1f);
+                    for (int i = 0; i < 7; i++) {
+                        player.level().addParticle(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+                    }
+                } else {
+                    if(player.level().isClientSide) {
+                        player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderunlocked"), true);
+                    }
+                    player.playNotifySound(SoundEvents.AXE_WAX_OFF, SoundSource.NEUTRAL, 1f, 1f);
+                    for (int i = 0; i < 7; i++) {
+                        player.level().addParticle(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+                    }
+                }
+                bdubsPlayer.lifesizebdubs$setLastLockTicks(0);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void tickLastLockingShoulderEntity(EntityTickEvent.Post event) {
+        if(event.getEntity() instanceof Player player) {
+            LifeSizeBdubsPlayer bdubsPlayer = (LifeSizeBdubsPlayer) player;
+            bdubsPlayer.lifesizebdubs$setLastLockTicks(bdubsPlayer.lifesizebdubs$lastLockTicks() + 1);
+        }
     }
 
     public void registerEntityAttributes(EntityAttributeCreationEvent event) {

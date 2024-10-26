@@ -1,14 +1,22 @@
 package net.superkat.lifesizebdubs.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.world.entity.player.Player;
+import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsShoulderHandler;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Player.class)
-public abstract class PlayerMixin {
+public abstract class PlayerMixin implements LifeSizeBdubsPlayer {
+    @Unique
+    public boolean lockedShoulderEntities = false;
+    @Unique
+    public int lastLockTicks = 0;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void lifesizebdubs$tickShoulderBdubs(CallbackInfo ci) {
@@ -19,5 +27,30 @@ public abstract class PlayerMixin {
         //2 - x = 1
         //2 + -(5) = 1
         //2 + (-1) * (5) = 1
+    }
+
+    @WrapWithCondition(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;removeEntitiesOnShoulder()V"))
+    private boolean lifesizebdubs$shouldPreventRemovingShoulderEntities(Player instance) {
+        return !lockedShoulderEntities;
+    }
+
+    @Override
+    public boolean lifesizebdubs$lockedShoulderEntity() {
+        return lockedShoulderEntities;
+    }
+
+    @Override
+    public void lifesizebdubs$setLockedShoulderEntity(boolean locked) {
+        this.lockedShoulderEntities = locked;
+    }
+
+    @Override
+    public int lifesizebdubs$lastLockTicks() {
+        return lastLockTicks;
+    }
+
+    @Override
+    public void lifesizebdubs$setLastLockTicks(int ticks) {
+        this.lastLockTicks = ticks;
     }
 }

@@ -1,6 +1,10 @@
 package net.superkat.lifesizebdubs.data;
 
+import com.google.common.collect.Lists;
+import net.minecraft.network.chat.Component;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 //just a simple class to one line each message
 public class DefaultBdubsMessages {
@@ -34,5 +38,12 @@ public class DefaultBdubsMessages {
             "If you're in an area for a long time, zombies are more likely to pick up items, but if its uh an area thats uh not very spawn uh... If not been area, er around much then it - can spawn.... If.....",
             "Follow me this way *walks face first into the door* ow"
     );
+
+    //incase I decide to make the messages components - not doing now because of time
+//    public static List<Component> stringListToLiteralComponent(List<String> stringList) {
+//        List<Component> componentList = Lists.newArrayList();
+//        componentList.addAll(stringList.stream().map(Component::literal).toList());
+//        return componentList;
+//    }
 
 }
