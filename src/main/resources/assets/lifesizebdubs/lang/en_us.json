@@ -6,9 +6,11 @@
   "lifesizebdubs.variant.bdubs": "Life-Size Bdubs",
   "lifesizebdubs.variant.mossy": "Life-Size Mossy Bdubs",
 
-  "entity.lifesizebdubs.bdubsentity": "Lifesized Bdubs",
+  "entity.lifesizebdubs.bdubsentity": "Life-Size Bdubs",
   "entity.lifesizebdubs.funnybdubsmessage": "[%1$s]: %2$s",
   "entity.lifesizebdubs.name": "%1$s's %2$s",
   "lifesizebdubs.entityshoulderlocked": "Shoulder entities locked!",
-  "lifesizebdubs.entityshoulderunlocked": "Shoulder entities unlocked!"
+  "lifesizebdubs.entityshoulderunlocked": "Shoulder entities unlocked!",
+
+  "lifesizebdubs.configuration.displayBdubsMessages": "Display Bdubs Messages"
 }

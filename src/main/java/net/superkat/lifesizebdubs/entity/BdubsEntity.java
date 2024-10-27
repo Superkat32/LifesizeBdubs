@@ -28,9 +28,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
-import org.apache.commons.compress.utils.Lists;
+import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
+import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -40,9 +42,8 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.ClientUtil;
 import software.bernie.geckolib.util.GeckoLibUtil;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+
+import java.util.*;
 
 public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
@@ -70,7 +71,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public boolean onShoulder = false;
     public LivingEntity shoulderRidingPlayer = null;
     public int messageTicks = 1200;
-    public List<String> lastMessages = Lists.newArrayList();
+    public List<String> lastMessages = new ArrayList<>();
     public String lastTimedMessage = "";
     public int lastMessageTicks = 0;
 
@@ -193,7 +194,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
         //cheat haha
         for (RawAnimation idleAnim : IDLE_ANIMS) {
-            animController.triggerableAnim(idleAnim.toString().toLowerCase(Locale.US), idleAnim);
+            animController.triggerableAnim(animString(idleAnim), idleAnim);
             if(idleAnim == LAUGH_ANIM) {
                 animController.setSoundKeyframeHandler(event -> {
                     Player player = ClientUtil.getClientPlayer();
@@ -205,9 +206,13 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             }
         }
 
-        animController.triggerableAnim(DESPAWN_ANIM.toString().toLowerCase(Locale.US), DESPAWN_ANIM);
+        animController.triggerableAnim(animString(DESPAWN_ANIM), DESPAWN_ANIM);
 
         controllers.add(animController);
+    }
+
+    private String animString(RawAnimation anim) {
+        return anim.getAnimationStages().getFirst().animationName();
     }
 
     public void playIdleAnim() {
@@ -218,7 +223,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         } else {
             //don't play animation if a triggered animation(likely idle) is already playing
             if(!this.getAnimatableInstanceCache().getManagerForId(this.getId()).getAnimationControllers().get(controller).isPlayingTriggeredAnimation()) {
-                this.triggerAnim(controller, idleAnim.toString().toLowerCase(Locale.US));
+                this.triggerAnim(controller, animString(idleAnim));
             }
         }
         this.idleAnimTicks = this.random.nextInt(200, 1000);
@@ -236,14 +241,18 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                 if(overrideTime) {
                     this.getAnimatableInstanceCache().getManagerForId(this.getId()).getAnimationControllers().get(controller).forceAnimationReset();
                 }
-                this.triggerAnim(controller, WAVE_ANIM.toString().toLowerCase(Locale.US));
+                this.triggerAnim(controller, animString(WAVE_ANIM));
             }
             ticksSinceWave = 0;
         }
     }
 
     public void cheer() {
-        this.triggerAnim(controller, CHEER_ANIM.toString().toLowerCase(Locale.US));
+        this.triggerAnim(controller, animString(CHEER_ANIM));
+    }
+
+    public void givenSugarAnim() {
+        this.triggerAnim(controller, animString(GIVEN_SUGAR_ANIM));
     }
 
     //likely called serverside
@@ -316,7 +325,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void sendMessageToOwner(String message) {
         if(this.getOwner() instanceof ServerPlayer owner) {
             Component sentMessage = Component.translatable("entity.lifesizebdubs.funnybdubsmessage", getVariant().name(), message);
-            owner.displayClientMessage(sentMessage, false);
+            PacketDistributor.sendToPlayer(owner, new BdubsMessagePacket(sentMessage));
+//            owner.displayClientMessage(sentMessage, false);
         }
     }
 
@@ -338,7 +348,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
         ownerInteractionTicks++;
         if(ownerInteractionTicks >= 6000) { //5 minutes
-            triggerAnim(controller, DESPAWN_ANIM.toString().toLowerCase(Locale.US));
+            triggerAnim(controller, animString(DESPAWN_ANIM));
             if(ownerInteractionTicks >= 6045) {
                 this.discard();
             }
@@ -372,7 +382,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                             if(entityHitResult != null && entityHitResult.getEntity() == this && serverPlayer.hasLineOfSight(this)) {
                                 if(serverPlayer != this.spyglassWavedPlayer || (ticksSinceSpyglassWave >= 300 || serverPlayer.getTicksUsingItem() <= 40)) {
                                     this.spyglassWavedPlayer = serverPlayer;
-                                    wave(false);
+                                    wave(false, true);
                                 }
                             }
                         }
@@ -403,11 +413,9 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             if(giveSugar) {
                 itemStack.consume(1, player);
                 this.setSugarTicks(1200); //1 minute
-                this.triggerAnim(controller, GIVEN_SUGAR_ANIM.toString().toLowerCase(Locale.US));
-                this.spawnEvenFunnierParticles();
-                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.AMBIENT, 2, 1);
-                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_CHARGE, SoundSource.AMBIENT, 1f, 1.25f);
-                this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.AMBIENT, 1f, 1.25f);
+                if(this.level().isClientSide) {
+                    PacketDistributor.sendToServer(new BdubsVariantChangeEffectsPacket(this.getId(), true));
+                }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
         }
@@ -422,7 +430,9 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.setOwnerUUID(player.getUUID());
             this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_AMBIENT_WITH_ITEM, SoundSource.AMBIENT);
             if(hadItem || newVariant != this.getVariant()) {
-                spawnFunnyParticles();
+                if(this.level().isClientSide) {
+                    PacketDistributor.sendToServer(new BdubsVariantChangeEffectsPacket(this.getId(), false));
+                }
                 this.wave(true, true);
             }
             this.setVariant(newVariant);

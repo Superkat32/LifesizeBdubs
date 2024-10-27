@@ -32,20 +32,10 @@ public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, Playe
         CompoundTag compoundTag = leftShoulder ? livingEntity.getShoulderEntityLeft() : livingEntity.getShoulderEntityRight();
         EntityType.byString(compoundTag.getString("id"))
                 .filter(entityType -> entityType == LifeSizeBdubs.BDUBS_ENTITY.get())
-                .ifPresentOrElse(entityType -> {
-//                    BdubsEntity imposterBdubs = leftShoulder ? imposterBdubsLeft : imposterBdubsRight;
+                .ifPresent(entityType -> {
                     poseStack.pushPose();
-//                    BdubsVariant bdubsVariant = BdubsVariant.getVariantFromCompoundTag(compoundTag, livingEntity.registryAccess());
-//                    if(bdubsVariant == null) {
-//                        bdubsVariant = BdubsVariant.DEFAULT;
-//                    }
-//                    if(imposterBdubs == null) {
-//                        imposterBdubs = (BdubsEntity) EntityType.create(compoundTag, livingEntity.level()).get();
-//                        imposterBdubs.setVariant(bdubsVariant);
-//                        imposterBdubs.setOnShoulder(true, livingEntity);
-//                    }
-
-                    BdubsEntity imposterBdubs = BdubsShoulderHandler.getImposterBdubs(leftShoulder);
+                    BdubsEntity imposterBdubs = BdubsShoulderHandler.getImposterBdubs(livingEntity, leftShoulder);
+//                    BdubsEntity imposterBdubs = BdubsShoulderHandler.getImposterBdubs(leftShoulder);
                     if(imposterBdubs != null) {
                         BdubsEntityRenderer renderer = (BdubsEntityRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(imposterBdubs);
 
@@ -62,14 +52,6 @@ public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, Playe
                     }
 
                     poseStack.popPose();
-
-                    //cache entity I guess maybe perhaps perchance
-                    //cursed if else statements but it works?
-//                    if(leftShoulder) imposterBdubsLeft = imposterBdubs;
-//                    else imposterBdubsRight = imposterBdubs;
-                }, () -> {
-//                    if(leftShoulder) imposterBdubsLeft = null;
-//                    else imposterBdubsRight = null;
                 });
     }
 }

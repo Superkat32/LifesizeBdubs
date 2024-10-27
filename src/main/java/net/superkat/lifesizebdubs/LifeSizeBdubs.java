@@ -10,6 +10,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
@@ -28,17 +29,22 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
+import net.superkat.lifesizebdubs.network.BdubsClientPayloadHandler;
+import net.superkat.lifesizebdubs.network.BdubsServerPayloadHandler;
+import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
+import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -58,35 +64,33 @@ public class LifeSizeBdubs {
     public static final DeferredHolder<EntityType<?>, EntityType<BdubsEntity>> BDUBS_ENTITY = registerEntity("bdubsentity", BdubsEntity::new, 0.5f, 0.5f);
 
     //TODO - Test on multiplayer
-    //TODO - Config option to disable messages (requires custom packet)?
     //TODO - custom icon
     //TODO - tnt bdubs
     //TODO - Scar(Enchanter), Etho(Ladder), Grian(?)?
     //TODO - (after upload) wiki
 
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
+        //I really don't understand when to use which event - I just trial and error-ed what worked
         ENTITIES.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerDatapackRegistries);
         modEventBus.addListener(this::onGatherData);
         modEventBus.addListener(this::registerEntityAttributes);
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modEventBus.addListener(this::registerPackets);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(this::allowLockingShoulderEntities);
         NeoForge.EVENT_BUS.addListener(this::tickLastLockingShoulderEntity);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("HELLO FROM COMMON SETUP");
+//        LOGGER.info("HELLO FROM COMMON SETUP");
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("HELLO from server starting");
+//        LOGGER.info("HELLO from server starting");
     }
 
     public void registerDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
@@ -114,6 +118,19 @@ public class LifeSizeBdubs {
         ));
     }
 
+    public void registerPackets(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToClient(BdubsMessagePacket.TYPE, BdubsMessagePacket.STREAM_CODEC, BdubsClientPayloadHandler::onBdubsMessage);
+        registrar.playBidirectional(
+                BdubsVariantChangeEffectsPacket.TYPE,
+                BdubsVariantChangeEffectsPacket.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        BdubsClientPayloadHandler::onBdubsVariantChange,
+                        BdubsServerPayloadHandler::onBdubsVariantChange
+                )
+        );
+    }
+
     @SubscribeEvent
     public void allowLockingShoulderEntities(PlayerInteractEvent.RightClickItem event) {
         Player player = event.getEntity();
@@ -125,20 +142,22 @@ public class LifeSizeBdubs {
                 boolean newLocked = !locked;
                 bdubsPlayer.lifesizebdubs$setLockedShoulderEntity(newLocked);
                 if(newLocked) {
-                    if(player.level().isClientSide) {
+                    if(!player.level().isClientSide) {
                         player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderlocked"), true);
-                    }
-                    player.playNotifySound(SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 1f, 1f);
-                    for (int i = 0; i < 7; i++) {
-                        player.level().addParticle(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+                        player.playNotifySound(SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 1f, 1f);
+                        ((ServerLevel)player.level()).sendParticles(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 7, 0, 0, 0, 0);
+//                        for (int i = 0; i < 7; i++) {
+//                            player.level().addParticle(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+//                        }
                     }
                 } else {
-                    if(player.level().isClientSide) {
+                    if(!player.level().isClientSide) {
                         player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderunlocked"), true);
-                    }
-                    player.playNotifySound(SoundEvents.AXE_WAX_OFF, SoundSource.NEUTRAL, 1f, 1f);
-                    for (int i = 0; i < 7; i++) {
-                        player.level().addParticle(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+                        player.playNotifySound(SoundEvents.AXE_WAX_OFF, SoundSource.NEUTRAL, 1f, 1f);
+                        ((ServerLevel)player.level()).sendParticles(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 7, 0, 0, 0, 0);
+//                        for (int i = 0; i < 7; i++) {
+//                            player.level().addParticle(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
+//                        }
                     }
                 }
                 bdubsPlayer.lifesizebdubs$setLastLockTicks(0);
