@@ -1,0 +1,8 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.etho"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/etho.png",
+  "item": "minecraft:ladder",
+  "messages": []
+}

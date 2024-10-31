@@ -1,0 +1,14 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.tnt"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/tntbdubs.png",
+  "item": "minecraft:tnt",
+  "messages": [],
+  "timed_messages": [
+    {
+      "msg": "Ahhhh! Time to swheep!!!",
+      "time": 12500
+    }
+  ]
+}

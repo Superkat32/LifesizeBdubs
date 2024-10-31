@@ -1,6 +1,5 @@
 package net.superkat.lifesizebdubs;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
@@ -18,16 +17,21 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -39,6 +43,7 @@ import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
+import net.superkat.lifesizebdubs.data.DefaultBdubsVariants;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
 import net.superkat.lifesizebdubs.network.BdubsClientPayloadHandler;
@@ -47,8 +52,6 @@ import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
 import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import org.slf4j.Logger;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Mod(LifeSizeBdubs.MODID)
@@ -57,26 +60,27 @@ public class LifeSizeBdubs {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final ResourceKey<Registry<BdubsVariant>> BDUBS_VARIANT_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MODID, "bdubs_variant"));
-    public static final ResourceKey<BdubsVariant> BDUBS_DEFAULT_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "bdubs"));
-    public static final ResourceKey<BdubsVariant> BDUBS_MOSSY_VARIANT = ResourceKey.create(BDUBS_VARIANT_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(MODID, "mossy_bdubs"));
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     public static final DeferredHolder<EntityType<?>, EntityType<BdubsEntity>> BDUBS_ENTITY = registerEntity("bdubsentity", BdubsEntity::new, 0.5f, 0.5f);
 
-    //TODO - Test on multiplayer
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
+    public static final DeferredHolder<Item, SpawnEggItem> BDUBS_SPAWN_EGG_ITEM = ITEMS.register("lifesizebdubs_spawn_egg", () -> new DeferredSpawnEggItem(BDUBS_ENTITY, 0xffffff, 0xffffff, new Item.Properties()));
+
     //TODO - custom icon
-    //TODO - tnt bdubs
-    //TODO - Scar(Enchanter), Etho(Ladder), Grian(?)?
     //TODO - (after upload) wiki
+    //TODO - Ears compat
 
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
         //I really don't understand when to use which event - I just trial and error-ed what worked
         ENTITIES.register(modEventBus);
+        ITEMS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerDatapackRegistries);
         modEventBus.addListener(this::onGatherData);
         modEventBus.addListener(this::registerEntityAttributes);
         modEventBus.addListener(this::registerPackets);
+        modEventBus.addListener(this::addCreative);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
 
         NeoForge.EVENT_BUS.register(this);
@@ -102,18 +106,7 @@ public class LifeSizeBdubs {
     public void onGatherData(GatherDataEvent event) {
         event.getGenerator().addProvider(event.includeServer(), (DataProvider.Factory<DatapackBuiltinEntriesProvider>) output -> new DatapackBuiltinEntriesProvider(output, event.getLookupProvider(),
                 new RegistrySetBuilder()
-                .add(
-                    BDUBS_VARIANT_REGISTRY_KEY, bootstrap -> {
-                        bootstrap.register(BDUBS_DEFAULT_VARIANT, BdubsVariant.DEFAULT);
-                        bootstrap.register(BDUBS_MOSSY_VARIANT, new BdubsVariant(
-                                Component.translatable("lifesizebdubs.variant.mossy"),
-                                ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
-                                Items.MOSS_BLOCK.getDefaultInstance(),
-                                List.of("Moss my beloved"),
-                                Optional.of(List.of((Pair.of("Uh oh! Time to swheep!", 12500))))
-                        ));
-                    }
-                ),
+                .add(BDUBS_VARIANT_REGISTRY_KEY, DefaultBdubsVariants::bootstrap),
                 Set.of(MODID)
         ));
     }
@@ -146,23 +139,22 @@ public class LifeSizeBdubs {
                         player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderlocked"), true);
                         player.playNotifySound(SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 1f, 1f);
                         ((ServerLevel)player.level()).sendParticles(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 7, 0, 0, 0, 0);
-//                        for (int i = 0; i < 7; i++) {
-//                            player.level().addParticle(ParticleTypes.ITEM_SLIME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
-//                        }
                     }
                 } else {
                     if(!player.level().isClientSide) {
                         player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderunlocked"), true);
                         player.playNotifySound(SoundEvents.AXE_WAX_OFF, SoundSource.NEUTRAL, 1f, 1f);
                         ((ServerLevel)player.level()).sendParticles(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 7, 0, 0, 0, 0);
-//                        for (int i = 0; i < 7; i++) {
-//                            player.level().addParticle(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.15, player.getZ(), 0, 0, 0);
-//                        }
                     }
                 }
                 bdubsPlayer.lifesizebdubs$setLastLockTicks(0);
             }
         }
+    }
+
+    public void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS)
+            event.accept(BDUBS_SPAWN_EGG_ITEM.get());
     }
 
     @SubscribeEvent

@@ -36,7 +36,16 @@ public class DefaultBdubsMessages {
             "WUAAAUHAAAAHHAAAHA",
             "Yeaah Bdubs I am the king of Decked Out today... WHAAA OPEN THE DOOR!! OPEN THE DOOR !!!",
             "If you're in an area for a long time, zombies are more likely to pick up items, but if its uh an area thats uh not very spawn uh... If not been area, er around much then it - can spawn.... If.....",
-            "Follow me this way *walks face first into the door* ow"
+            "Follow me this way *walks face first into the door* ow",
+            "We are friends, I don't know anything about remembering anything!",
+            "Stop! Hammer time!",
+            "I almost ate my diamond sword!",
+            "This is something that looks like a diamond pickaxe, but is actually called a diamond sword.",
+            "That's freaking it - I'm looking at an enderman.",
+            "Wanna eat a cobblestone wall?",
+            "Boom! ... nothing.",
+            "Uh oh!",
+            "Ideally, we figure out how many blocks Tango is away from me, multiply that by 1.618, and then that can give us the distance you need to be away from him."
     );
 
     //incase I decide to make the messages components - not doing now because of time

@@ -1,0 +1,11 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.timmy"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/timmy.png",
+  "item": "minecraft:saddle",
+  "messages": [
+    "I'm a toy...",
+    "I'm not a toy!"
+  ]
+}

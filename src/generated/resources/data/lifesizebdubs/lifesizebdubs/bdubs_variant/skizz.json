@@ -1,0 +1,8 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.skizz"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/skizz.png",
+  "item": "minecraft:wind_charge",
+  "messages": []
+}

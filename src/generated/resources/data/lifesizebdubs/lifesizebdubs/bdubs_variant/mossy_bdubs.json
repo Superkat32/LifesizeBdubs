@@ -4,9 +4,7 @@
   },
   "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
   "item": "minecraft:moss_block",
-  "messages": [
-    "Moss my beloved"
-  ],
+  "messages": [],
   "timed_messages": [
     {
       "msg": "Uh oh! Time to swheep!",

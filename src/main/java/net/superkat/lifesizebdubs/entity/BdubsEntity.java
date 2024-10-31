@@ -35,6 +35,7 @@ import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -93,9 +94,15 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
-        //whatever happens in Leashable#closeRangeLeashBehaviour is messing with
-        //my Bdubs shoulder renderer, causing it to spin
         return false;
+    }
+
+    @Override
+    public Component getDisplayName() {
+        if(this.isDeadOrDying()) {
+            return this.getVariant().name();
+        }
+        return super.getDisplayName();
     }
 
     @Override
@@ -146,6 +153,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         if(this.getOwner() != null) {
 //            Component name = Component.translatable("entity.lifesizebdubs.name", this.getOwner().getDisplayName(), this.getVariant().name());
 //            this.setCustomName(name);
+//            this.setCustomName(this.getVariant().name());
             ownerInteractionTicks = 0;
         }
     }
@@ -176,6 +184,14 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void setOnShoulder(boolean onShoulder, LivingEntity player) {
         this.onShoulder = onShoulder;
         this.shoulderRidingPlayer = player;
+        if(onShoulder) { //HAHAHAHA FIXED THE SPINNING BUG HAHAHAHAHHAHAA... - also it's a feature now lol
+            this.setYBodyRot(0);
+            this.yHeadRotO = 0;
+            this.setYHeadRot(0);
+            this.yBodyRotO = 0;
+//            this.setRot(0, 0); <- THIS IS BAD DON'T DO
+            this.hurtTime = 0;//prevent staying hurt while on shoulder wow what a crazy bug that was
+        }
     }
 
     @Override
@@ -221,10 +237,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         if(idleAnim == WAVE_ANIM) {
             this.wave(false);
         } else {
-            //don't play animation if a triggered animation(likely idle) is already playing
-            if(!this.getAnimatableInstanceCache().getManagerForId(this.getId()).getAnimationControllers().get(controller).isPlayingTriggeredAnimation()) {
-                this.triggerAnim(controller, animString(idleAnim));
-            }
+            this.triggerAnim(controller, animString(idleAnim));
         }
         this.idleAnimTicks = this.random.nextInt(200, 1000);
     }
@@ -354,7 +367,9 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             }
         } else {
             //don't allow idle animations to play while despawning
-            tickAnimation();
+            if(!this.level().isClientSide) {
+                tickAnimation();
+            }
             int sugarTicks = getSugarTicks();
             if(sugarTicks > 0) {
                 setSugarTicks(sugarTicks - 1);
@@ -401,7 +416,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
 
-        if(itemStack.is(Items.SUGAR) && !isShowcaseMode()) {
+        if(itemStack.is(Items.SUGAR) && !isShowcaseMode() && isOwner) {
             boolean giveSugar;
             boolean newVariantItemIsSugar = newVariant != null && newVariant.item().is(itemStack.getItem());
             if(newVariantItemIsSugar) {
@@ -420,8 +435,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             }
         }
 
-        if(newVariant != null && newVariant != this.getVariant()) {
-            if(isShowcaseMode() && this.getOwner() != null) {
+        if(newVariant != null && newVariant != this.getVariant() && (!hasOwner || isOwner)) {
+            if(isShowcaseMode() && hasOwner) {
                 //only let owner do things
                 if(!player.equals(this.getOwner())) return InteractionResult.PASS;
             }

@@ -5,12 +5,23 @@
 
   "lifesizebdubs.variant.bdubs": "Life-Size Bdubs",
   "lifesizebdubs.variant.mossy": "Life-Size Mossy Bdubs",
+  "lifesizebdubs.variant.tnt": "Life-Size Unhinged Bdubs",
+  "lifesizebdubs.variant.scar": "Mini Scar",
+  "lifesizebdubs.variant.grian": "Mini Grian",
+  "lifesizebdubs.variant.skizz": "Mini Skizz",
+  "lifesizebdubs.variant.etho": "Mini Etho",
+  "lifesizebdubs.variant.timmy": "Life-Size Timmy",
 
   "entity.lifesizebdubs.bdubsentity": "Life-Size Bdubs",
   "entity.lifesizebdubs.funnybdubsmessage": "[%1$s]: %2$s",
   "entity.lifesizebdubs.name": "%1$s's %2$s",
+  "item.lifesizebdubs.lifesizebdubs_spawn_egg": "Life-Size Bdubs Spawn Egg",
   "lifesizebdubs.entityshoulderlocked": "Shoulder entities locked!",
   "lifesizebdubs.entityshoulderunlocked": "Shoulder entities unlocked!",
 
-  "lifesizebdubs.configuration.displayBdubsMessages": "Display Bdubs Messages"
+  "lifesizebdubs.configuration.displayBdubsMessages": "Display Bdubs Messages",
+  "lifesizebdubs.configuration.title": "Life-Size Bdubs Config",
+  "lifesizebdubs.configuration.section.lifesizebdubs.client.toml": "Life-Size Bdubs Client Config",
+  "lifesizebdubs.configuration.section.lifesizebdubs.client.toml.title": "Life-Size Bdubs Client Config",
+  "lifesizebdubs.configuration.displayBdubsMessages.tooltip": "If enabled, messages from a Life-Size Bdubs on your shoulder will be displayed to you in chat. Note that these messages only appear to the player whom the Life-Size Bdubs is on."
 }
