@@ -68,6 +68,10 @@ public class LifeSizeBdubs {
     public static final DeferredHolder<Item, SpawnEggItem> BDUBS_SPAWN_EGG_ITEM = ITEMS.register("lifesizebdubs_spawn_egg", () -> new DeferredSpawnEggItem(BDUBS_ENTITY, 0xffffff, 0xffffff, new Item.Properties()));
 
     //TODO - custom icon
+    //FIXME - ticks of error for timed message(10?)
+    //FIXME - increase min time between sent messages
+    //FIXME - fix duplicate message prevention not working
+    //FIXME - bdubs might still be able to despawn if in showcase mode
     //TODO - (after upload) wiki
     //TODO - Ears compat
 
