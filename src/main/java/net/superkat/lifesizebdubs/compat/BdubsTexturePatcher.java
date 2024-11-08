@@ -7,6 +7,7 @@ import net.superkat.lifesizebdubs.LifeSizeBdubsClient;
 
 public class BdubsTexturePatcher {
 
+    //Removes the alpha on a skin texture
     public static void patchBdubsTexture(NativeImage image, ResourceLocation location) {
         if(LifeSizeBdubsClient.earsLoaded()) {
             EarsCompat.patchBdubsTexture(image, location);

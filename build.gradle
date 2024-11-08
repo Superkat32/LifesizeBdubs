@@ -156,13 +156,6 @@ dependencies {
 
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
 
-    //I am so smart I figured this out all by myself by exploring the maven all by myself without any help I feel so powerful let's go
-//    implementation "com.unascribed:ears-api:${ears_version}"
-//    implementation project("com.unascribed:ears-common:${ears_version}")
-
-//    compileOnly "com.unascribed:ears-common:${ears_version}"
-//    localRuntime "com.unascribed:ears-common:${ears_version}"
-
     compileOnly "maven.modrinth:ears:${ears_version}"
     localRuntime "maven.modrinth:ears:${ears_version}"
 }

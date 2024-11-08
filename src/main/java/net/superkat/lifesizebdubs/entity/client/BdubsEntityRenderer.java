@@ -3,13 +3,13 @@ package net.superkat.lifesizebdubs.entity.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
-import net.superkat.lifesizebdubs.LifeSizeBdubsClient;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
 import org.jetbrains.annotations.Nullable;
@@ -46,9 +46,6 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
             }
         });
 
-        if(LifeSizeBdubsClient.earsLoaded()) {
-            addRenderLayer(new BdubsEarsLayerRenderer(this));
-        }
         this.withScale(0.25f);
     }
 
@@ -62,6 +59,11 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
         public BdubsEntityModel() {
             super(ResourceLocation.fromNamespaceAndPath(LifeSizeBdubs.MODID, "lifesizebdubs"), true);
             withAltTexture(ResourceLocation.withDefaultNamespace("textures/item/spyglass.png"));
+        }
+
+        @Override
+        public @Nullable RenderType getRenderType(BdubsEntity animatable, ResourceLocation texture) {
+            return RenderType.entityTranslucent(texture);
         }
 
         @Override
