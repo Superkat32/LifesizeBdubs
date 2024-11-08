@@ -21,8 +21,7 @@ public class SimpleTextureMixin {
     @Inject(method = "load", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;isOnRenderThreadOrInit()Z"))
     public void lifesizebdubs$textureTransparencyFix(ResourceManager resourceManager, CallbackInfo ci, @Local NativeImage nativeImage) {
         if(location.getPath().startsWith("textures/bdubs")) {
-//            EarsCompat.fixTextureAlpha(nativeImage);
-            BdubsTexturePatcher.patchBdubsTexture(nativeImage);
+            BdubsTexturePatcher.patchBdubsTexture(nativeImage, location);
         }
     }
 

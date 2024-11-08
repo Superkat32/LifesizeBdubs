@@ -2,13 +2,14 @@ package net.superkat.lifesizebdubs.compat;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.HttpTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.superkat.lifesizebdubs.LifeSizeBdubsClient;
 
 public class BdubsTexturePatcher {
 
-    public static void patchBdubsTexture(NativeImage image) {
+    public static void patchBdubsTexture(NativeImage image, ResourceLocation location) {
         if(LifeSizeBdubsClient.earsLoaded()) {
-            EarsCompat.patchBdubsTexture(image);
+            EarsCompat.patchBdubsTexture(image, location);
         } else {
             setNoAlpha(image, 0, 0, 32, 16);
             setNoAlpha(image, 0, 16, 64, 32);

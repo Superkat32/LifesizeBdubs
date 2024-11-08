@@ -17,6 +17,7 @@ import net.minecraft.world.item.Items;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,5 +78,16 @@ public record BdubsVariant(Component name, ResourceLocation texture, ItemStack i
                     returnVariant.set(bdubsVariantReference.value());
                 });
         return returnVariant.get();
+    }
+
+    public static List<BdubsVariant> getVariantsFromTextureLocation(ResourceLocation location, RegistryAccess registryAccess) {
+        Registry<BdubsVariant> registry = registryAccess.registryOrThrow(LifeSizeBdubs.BDUBS_VARIANT_REGISTRY_KEY);
+        List<BdubsVariant> variants = new ArrayList<>();
+        for (BdubsVariant variant : registry.stream().toList()) {
+            if(variant.texture.equals(location)) {
+                variants.add(variant);
+            }
+        }
+        return variants;
     }
 }
