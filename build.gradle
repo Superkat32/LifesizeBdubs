@@ -26,6 +26,18 @@ repositories {
             includeGroup("software.bernie.geckolib")
         }
     }
+
+    maven {
+        url "https://repo.unascribed.com"
+        content {
+            includeGroup "com.unascribed"
+        }
+    }
+
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 base {
@@ -143,6 +155,16 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+
+    //I am so smart I figured this out all by myself by exploring the maven all by myself without any help I feel so powerful let's go
+//    implementation "com.unascribed:ears-api:${ears_version}"
+//    implementation project("com.unascribed:ears-common:${ears_version}")
+
+//    compileOnly "com.unascribed:ears-common:${ears_version}"
+//    localRuntime "com.unascribed:ears-common:${ears_version}"
+
+    compileOnly "maven.modrinth:ears:${ears_version}"
+    localRuntime "maven.modrinth:ears:${ears_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

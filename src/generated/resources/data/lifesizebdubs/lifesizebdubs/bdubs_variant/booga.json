@@ -1,0 +1,15 @@
+{
+  "name": "Mini Booga",
+  "texture": "lifesizebdubs:textures/bdubs/booga.png",
+  "item": "minecraft:command_block",
+  "messages": [
+    "Booga message 1",
+    "Booga message 2 electric boogaloo"
+  ],
+  "timed_messages": [
+    {
+      "msg": "Timed booga!",
+      "time": 12500
+    }
+  ]
+}

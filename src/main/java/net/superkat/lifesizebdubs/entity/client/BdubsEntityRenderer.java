@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
+import net.superkat.lifesizebdubs.compat.BdubsEarsLayerRenderer;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +45,8 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
                 super.renderStackForBone(poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
             }
         });
+
+        addRenderLayer(new BdubsEarsLayerRenderer(this));
         this.withScale(0.25f);
     }
 

@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,8 @@ public class DefaultBdubsVariants {
     public static final ResourceKey<BdubsVariant> SKIZZ_VARIANT = createBdubsKey("skizz");
     public static final ResourceKey<BdubsVariant> ETHO_VARIANT = createBdubsKey("etho");
     public static final ResourceKey<BdubsVariant> TIMMY_VARIANT = createBdubsKey("timmy");
+
+    public static final ResourceKey<BdubsVariant> TEST_VARIANT = createBdubsKey("booga");
 
     public static void bootstrap(BootstrapContext<BdubsVariant> bootstrap) {
         bootstrap.register(BDUBS_DEFAULT_VARIANT, BdubsVariant.DEFAULT);
@@ -83,6 +86,14 @@ public class DefaultBdubsVariants {
                 Items.SADDLE.getDefaultInstance(),
                 List.of("I'm a toy...", "I'm not a toy!"),
                 Optional.empty()
+        ));
+
+        bootstrap.register(TEST_VARIANT, new BdubsVariant(
+                Component.literal("Mini Booga"),
+                ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/booga.png"),
+                Items.COMMAND_BLOCK.getDefaultInstance(),
+                List.of("Booga message 1", "Booga message 2 electric boogaloo"),
+                Optional.of(List.of(Pair.of("Timed booga!", 12500)))
         ));
     }
 
