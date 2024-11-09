@@ -73,6 +73,7 @@ public class LifeSizeBdubs {
     //FIXME - fix duplicate message prevention not working
     //FIXME - bdubs might still be able to despawn if in showcase mode
     //FIXME - handle multiple variants using the same item (good luck lol)
+    //FIXME - likely need to account for smaller player sizes
     //TODO - (after upload) wiki
 
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
