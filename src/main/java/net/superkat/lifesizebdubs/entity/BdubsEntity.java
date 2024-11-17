@@ -272,37 +272,39 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void tickMessages() {
         if(this.getOwner() != null && this.onShoulder) {
             BdubsVariant variant = this.getVariant();
-            List<String> messages = variant.messages();
+            if (variant.messages().isPresent()) {
+                List<String> messages = variant.messages().get();
 
-            messageTicks--;
-            lastMessageTicks++;
+                messageTicks--;
+                lastMessageTicks++;
 
-            if(messageTicks <= 0 && !messages.isEmpty()) {
-                String sentMessage = null;
-                for (int i = 0; i < 10; i++) {
-                    //get random message
-                    int msgIndex = this.random.nextInt(messages.size());
-                    String message = messages.get(msgIndex);
-                    if(message != null && !message.isEmpty()) {
-                        //check if message has been sent recently
-                        boolean sentRecently = lastMessages.contains(message);
-                        if(!sentRecently) {
-                            sentMessage = message;
-                            break;
+                if(messageTicks <= 0 && !messages.isEmpty()) {
+                    String sentMessage = null;
+                    for (int i = 0; i < 10; i++) {
+                        //get random message
+                        int msgIndex = this.random.nextInt(messages.size());
+                        String message = messages.get(msgIndex);
+                        if(message != null && !message.isEmpty()) {
+                            //check if message has been sent recently
+                            boolean sentRecently = lastMessages.contains(message);
+                            if(!sentRecently) {
+                                sentMessage = message;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if(sentMessage != null) {
-                    sendMessageToOwner(sentMessage);
-                    lastMessages.addFirst(sentMessage);
-                    int maxLastMessages = variant.messages().size() > 5 ? 5 : variant.messages().size() - 1;
-                    if(lastMessages.size() > maxLastMessages) {
-                        lastMessages.removeLast();
+                    if(sentMessage != null) {
+                        sendMessageToOwner(sentMessage);
+                        lastMessages.addFirst(sentMessage);
+                        int maxLastMessages = messages.size() > 5 ? 5 : messages.size() - 1;
+                        if(lastMessages.size() > maxLastMessages) {
+                            lastMessages.removeLast();
+                        }
                     }
-                }
 
-                messageTicks = this.random.nextInt(6000, 8400); //5-7 minutes
+                    messageTicks = this.random.nextInt(7500, 10000); //idk how long this is I think it gets called twice per tick
+                }
             }
 
             int time = (int) this.level().getDayTime();
@@ -311,6 +313,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             if(optionalTimedMessages.isPresent()) {
                 List<Pair<String, Integer>> timedMessages = optionalTimedMessages.get();
                 for (Pair<String, Integer> timedMessage : timedMessages) {
+//                    if(timedMessage.getSecond() <= time && timedMessage.getSecond() + 10 >= time) {
                     if(timedMessage.getSecond() == time) {
                         String msg = timedMessage.getFirst();
                         if(msg != null && !msg.isEmpty()) {
@@ -360,7 +363,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         super.tick();
 
         ownerInteractionTicks++;
-        if(ownerInteractionTicks >= 6000) { //5 minutes
+        if(ownerInteractionTicks >= 6000 && !isShowcaseMode()) { //5 minutes
             triggerAnim(controller, animString(DESPAWN_ANIM));
             if(ownerInteractionTicks >= 6045) {
                 this.discard();
@@ -508,5 +511,14 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return null;
+    }
+
+    @Override
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
+        if(this.getOwner() != null && this.level() instanceof ServerLevel serverLevel) {
+            serverLevel.playSound(null, this.getOnPos(), SoundEvents.ALLAY_THROW, SoundSource.NEUTRAL, 1.5f, 1f);
+            serverLevel.playSound(null, this.getOnPos(), SoundEvents.AMETHYST_BLOCK_FALL, SoundSource.NEUTRAL, 0.8f, 1f);
+        }
     }
 }

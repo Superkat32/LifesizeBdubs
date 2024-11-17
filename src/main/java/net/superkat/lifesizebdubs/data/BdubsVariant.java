@@ -22,13 +22,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public record BdubsVariant(Component name, ResourceLocation texture, ItemStack item, List<String> messages, Optional<List<Pair<String, Integer>>> timedMessages) {
+public record BdubsVariant(Component name, ResourceLocation texture, ItemStack item, Optional<List<String>> messages, Optional<List<Pair<String, Integer>>> timedMessages) {
+
+    public BdubsVariant(Component name, ResourceLocation texture, ItemStack item) {
+        this(name, texture, item, Optional.empty(), Optional.empty());
+    }
+
+    public BdubsVariant(Component name, ResourceLocation texture, ItemStack item, List<String> messages) {
+        this(name, texture, item, Optional.of(messages), Optional.empty());
+    }
+
+    public BdubsVariant(Component name, ResourceLocation texture, ItemStack item, Optional<List<String>> messages) {
+        this(name, texture, item, messages, Optional.empty());
+    }
+
+    public BdubsVariant(Component name, ResourceLocation texture, ItemStack item, List<String> messages, Optional<List<Pair<String, Integer>>> timedMessages) {
+        this(name, texture, item, Optional.of(messages), timedMessages);
+    }
+
     public static final Codec<BdubsVariant> DIRECT_CODEC = RecordCodecBuilder.create(instance -> {
         return instance.group(
                 ComponentSerialization.CODEC.fieldOf("name").forGetter(BdubsVariant::name),
                 ResourceLocation.CODEC.fieldOf("texture").forGetter(BdubsVariant::texture),
                 ItemStack.SIMPLE_ITEM_CODEC.fieldOf("item").forGetter(BdubsVariant::item),
-                Codec.STRING.listOf().fieldOf("messages").forGetter(BdubsVariant::messages),
+                Codec.STRING.listOf().optionalFieldOf("messages").forGetter(BdubsVariant::messages),
                 Codec.mapPair(
                         Codec.STRING.fieldOf("msg"),
                         Codec.intRange(0, 24000).fieldOf("time")
@@ -42,7 +59,7 @@ public record BdubsVariant(Component name, ResourceLocation texture, ItemStack i
             Component.translatable("lifesizebdubs.variant.bdubs"),
             ResourceLocation.fromNamespaceAndPath(LifeSizeBdubs.MODID, "textures/bdubs/bdubs.png"),
             Items.CLOCK.getDefaultInstance(),
-            DefaultBdubsMessages.DEFAULT_BDUBS_VARIANT_MESSAGES,
+            Optional.of(DefaultBdubsMessages.DEFAULT_BDUBS_VARIANT_MESSAGES),
             Optional.of(List.of((Pair.of("Time to swheep!", 12500))))
     );
 

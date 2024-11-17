@@ -15,7 +15,7 @@ Additional items can also be given for different variants.
 - A ladder for Etho
 - An enchanting table for GoodTimesWithScar
 - An egg for Grian
-- A wind charge for Skizzleman
+- A snowball for Skizzleman
 - A saddle for SolidarityGaming
 
 Bdubs doesn't want to cause lag on your world though, so after 5 minutes of no interaction from the Bdubs owner, he'll disappear without a trace!
@@ -50,7 +50,7 @@ All the creator's mentioned via built-in Bdubs variants can be found here:
 
 GeckoLib v4 is required.
 
-As of Life-Size Bdubs v1.0.0, there may be an incompatibility with Ears skins that have wings enabled. There will be an attempt to fix this in the future, but no guarantees.
+As of Life-Size Bdubs 1.0.1, Ears features are not supported/rendered, **_BUT_** Ears skins (including those with wings enabled) do not cause any transparency issues so long as Ears is installed.
 
 **Have fun!!**
 
@@ -58,29 +58,36 @@ As of Life-Size Bdubs v1.0.0, there may be an incompatibility with Ears skins th
 
 ## Adding your own life-size friend!
 
+Adding your own Bdubs variant can be done with a datapack. This page does not tell you how to create a datapack.
+
+For this example, we will be adding a new variant called "Booga". Let's begin!
+
 ### Template Json (WIP)
-Replace all `examplepack` with your datapack name, and all `examplebdubs` with your Bdubs variant name.
+Replace all `boogapack` with your datapack name, and all `booga` with your Bdubs variant name.
 
-The json should be found in:  
-`data/examplepack/lifesizebdubs/bdubs_variant/examplebdubs.json`
+Place your variant texture into:  
+`data/<your pack name>/bdubs/<your variant name>.png`
 
-The texture should be found in:
-`data/examplepack/bdubs/examplebdubs.png`
+Copy-paste the following template into:  
+`data/<your pack name>/lifesizebdubs/bdubs_variant/<your variant name>.json`  
+and fill out the information using the guide below.
+
+NOTE: As of Life-Size Bdubs 1.0.1, multiple variants using the same item is not supported. This may be added in the future.
 
 ```json templatebdubs.json
 {
   "name": {
-    "translate": "<pack name here>.variant.<variant name here>"
+    "translate": ""
   },
-  "item": "minecraft:clock",
-  "texture": "<pack name here>:textures/bdubs/<variant name here>.png",
+  "item": "",
+  "texture": "",
   "messages": [
-    "<message one>",
-    "<message two>"
+    "",
+    ""
   ],
   "timed_messages": [
     {
-      "msg": "<time message>",
+      "msg": "",
       "time": 12500
     }
   ]
@@ -88,19 +95,19 @@ The texture should be found in:
 ```
 
 ### Json explained
-- name: The name shown when the Bdubs variant sends a messages and dies (Text component).
+- name: The name shown when the Bdubs variant sends messages and dies (Text component).
 - item: The item needed to give a Bdubs entity to turn it into that variant (Item).
 - texture: The texture used for the Bdubs variant (Resource Location).
-- messages: The list of possible messages the Bdubs variant can send once on their owner's shoulder (String array)
-- timed_messages: A list of messages to be sent at a specific time to the owner if the Bdubs entity is on their shoulder (Array of Pair of String and Int).
+- messages* : The list of possible messages the Bdubs variant can send once on their owner's shoulder (String array)
+- timed_messages*: A list of messages to be sent at a specific time to the owner if the Bdubs entity is on their shoulder (Array of Pair of String & Int).
   - msg: The message sent at the specific time (String)
   - time: The time of day the message of `msg` should be sent. (Int 0-24000)
 
+\*Optional fields - should not be added if you don't plan on using it.
+
 ### Adding your own variant (WIP)
 
-Adding your own Bdubs variant can be done with a datapack. This page does not tell you how to create a datapack.
-
-For this example, we will be adding a new variant called "Booga". Let's begin! 
+For this example, we will be adding a new variant called "Booga". Let's begin!
 
 #### Add your skin texture
 
@@ -114,22 +121,22 @@ Create a new json file in:
 
 Copy-paste the template above into that newly created json file.
 
-Change all the instances of `<pack name here>` and `<variant name here>` to your pack name and variant name respectively.
+Change all the instances of `<pack name here>` to your pack name(sometimes referred to as pack id). Replace all instances of `booga` with your variant name, if you want a different one.
 
-For this example, the pack name is `boogapack`
+For rest of this example, the pack name is `boogapack`
 
 ```json booga.json
 {
   "name": "Mini Booga",
-  "item": "minecraft:diamond",
   "texture": "boogapack:textures/bdubs/booga.png",
+  "item": "minecraft:diamond",
   "messages": [
-    "Booga 1",
-    "Booga 2 electric boogaloo"
+    "Booga message 1",
+    "Booga message 2 electric boogaloo"
   ],
   "timed_messages": [
     {
-      "msg": "Timed booga",
+      "msg": "Timed booga!",
       "time": 12500
     }
   ]

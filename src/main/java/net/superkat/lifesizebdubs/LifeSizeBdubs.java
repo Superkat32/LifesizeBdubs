@@ -67,14 +67,8 @@ public class LifeSizeBdubs {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredHolder<Item, SpawnEggItem> BDUBS_SPAWN_EGG_ITEM = ITEMS.register("lifesizebdubs_spawn_egg", () -> new DeferredSpawnEggItem(BDUBS_ENTITY, 0xffffff, 0xffffff, new Item.Properties()));
 
-    //FIXME - SKizz item to snowball
     //FIXME - ticks of error for timed message(10?)
-    //FIXME - increase min time between sent messages
-    //FIXME - fix duplicate message prevention not working
-    //FIXME - bdubs might still be able to despawn if in showcase mode
     //FIXME - handle multiple variants using the same item (good luck lol)
-    //FIXME - likely need to account for smaller player sizes
-    //TODO - (after upload) wiki
 
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
         //I really don't understand when to use which event - I just trial and error-ed what worked

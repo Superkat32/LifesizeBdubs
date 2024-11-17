@@ -51,41 +51,32 @@ public class DefaultBdubsVariants {
         bootstrap.register(SCAR_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.scar"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/scar.png"),
-                Items.ENCHANTING_TABLE.getDefaultInstance(),
-                List.of(),
-                Optional.empty()
+                Items.ENCHANTING_TABLE.getDefaultInstance()
         ));
 
         bootstrap.register(GRIAN_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.grian"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/grian.png"),
-                Items.EGG.getDefaultInstance(),
-                List.of(),
-                Optional.empty()
+                Items.EGG.getDefaultInstance()
         ));
 
         bootstrap.register(SKIZZ_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.skizz"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/skizz.png"),
-                Items.WIND_CHARGE.getDefaultInstance(),
-                List.of(),
-                Optional.empty()
+                Items.SNOWBALL.getDefaultInstance()
         ));
 
         bootstrap.register(ETHO_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.etho"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/etho.png"),
-                Items.LADDER.getDefaultInstance(),
-                List.of(),
-                Optional.empty()
+                Items.LADDER.getDefaultInstance()
         ));
 
         bootstrap.register(TIMMY_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.timmy"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/timmy.png"),
                 Items.SADDLE.getDefaultInstance(),
-                List.of("I'm a toy...", "I'm not a toy!"),
-                Optional.empty()
+                List.of("I'm a toy...", "I'm not a toy!")
         ));
 
         bootstrap.register(TEST_VARIANT, new BdubsVariant(

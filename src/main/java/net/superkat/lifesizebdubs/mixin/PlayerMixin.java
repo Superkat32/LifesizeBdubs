@@ -1,6 +1,5 @@
 package net.superkat.lifesizebdubs.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.world.entity.player.Player;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
@@ -31,6 +30,12 @@ public abstract class PlayerMixin implements LifeSizeBdubsPlayer {
 
     @WrapWithCondition(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;removeEntitiesOnShoulder()V"))
     private boolean lifesizebdubs$shouldPreventRemovingShoulderEntities(Player instance) {
+        return !lockedShoulderEntities;
+    }
+
+    //it's midnight my names aren't the greatest - actually that's a lie this is fantastic
+    @WrapWithCondition(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;removeEntitiesOnShoulder()V"))
+    private boolean lifesizebdubs$preventRemovingShoulderEntitiesAfterGettingAbsolutelyDestroyedAndOrQuitePossiblySmackedInTheFaceByAMaceOrByMumbo(Player instance) {
         return !lockedShoulderEntities;
     }
 

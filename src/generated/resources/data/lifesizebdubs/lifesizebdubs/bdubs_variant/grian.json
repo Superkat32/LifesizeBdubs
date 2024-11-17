@@ -3,6 +3,5 @@
     "translate": "lifesizebdubs.variant.grian"
   },
   "texture": "lifesizebdubs:textures/bdubs/grian.png",
-  "item": "minecraft:egg",
-  "messages": []
+  "item": "minecraft:egg"
 }

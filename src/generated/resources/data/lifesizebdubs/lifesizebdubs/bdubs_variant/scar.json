@@ -3,6 +3,5 @@
     "translate": "lifesizebdubs.variant.scar"
   },
   "texture": "lifesizebdubs:textures/bdubs/scar.png",
-  "item": "minecraft:enchanting_table",
-  "messages": []
+  "item": "minecraft:enchanting_table"
 }

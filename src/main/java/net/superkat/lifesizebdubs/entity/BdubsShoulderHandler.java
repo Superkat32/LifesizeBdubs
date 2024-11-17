@@ -14,9 +14,6 @@ import java.util.Map;
 public class BdubsShoulderHandler {
     public static Map<Player, Pair<BdubsEntity, BdubsEntity>> imposters = Maps.newHashMap();
 
-    public static BdubsEntity imposterBdubsLeft = null;
-    public static BdubsEntity imposterBdubsRight = null;
-
     @Nullable
     public static BdubsEntity getImposterBdubs(Player player, boolean left) {
         BdubsEntity imposter = null;
