@@ -36,7 +36,7 @@ The texture is the exact same as a Minecraft skin, so you can simply copy-paste 
 
 This mod was a mod created by a fan of HermitCraft(and friends of the Hermits), and means no harm towards any of the creators mentioned. It was originally a reference to the one bit ZombieCleo did where she made a tiny armor stand of Bdubs.
 
-While all the skin textures were recreated by me to better fit the smaller entity and my art style, it is in no means supposed to undermine the work, creativity, and originality of the creator's original skins and their respective artist. 
+While all the skin textures were recreated by me to better fit the smaller entity and my art style, it is in no means supposed to undermine the work, creativity, and originality of the creator's original skins and their respective artist.
 
 All the creator's mentioned via built-in Bdubs variants can be found here:
 - BDoubleO100 (referred to as Bdubs): https://www.youtube.com/@bdoubleo
@@ -76,11 +76,9 @@ NOTE: As of Life-Size Bdubs 1.0.1, multiple variants using the same item is not 
 
 ```json templatebdubs.json
 {
-  "name": {
-    "translate": ""
-  },
-  "item": "",
+  "name": "",
   "texture": "",
+  "item": "",
   "messages": [
     "",
     ""
