@@ -43,7 +43,7 @@ public class BdubsOnShoulderLayer<T extends Player> extends RenderLayer<T, Playe
                         poseStack.translate(leftShoulder ? 0.425F : -0.425F, livingEntity.isCrouching() ? -0.35F : -0.15f, 0.07F);
 
                         if(imposterBdubs.getSugarTicks() > 0) {
-                            double ticks = (double) livingEntity.level().getDayTime();
+                            double ticks = livingEntity.tickCount;
                             poseStack.mulPose(Axis.YP.rotationDegrees((float) (ticks * -75f)));
                         }
 

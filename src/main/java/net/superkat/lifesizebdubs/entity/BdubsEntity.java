@@ -414,7 +414,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        boolean hasOwner = this.getOwner() != null;
+        boolean hasOwner = this.getOwnerUUID() != null;
         boolean isOwner = hasOwner && player == this.getOwner();
         boolean hadItem = this.getItemBySlot(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         BdubsVariant newVariant = BdubsVariant.getVariantFromItem(itemStack, this.registryAccess());
@@ -438,7 +438,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             }
         }
 
-        if(newVariant != null && newVariant != this.getVariant() && (!hasOwner || isOwner)) {
+        if(newVariant != null && (newVariant != this.getVariant() && (!hasOwner || isOwner) || !hasOwner)) {
             if(isShowcaseMode() && hasOwner) {
                 //only let owner do things
                 if(!player.equals(this.getOwner())) return InteractionResult.PASS;
@@ -447,7 +447,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
             this.setOwnerUUID(player.getUUID());
             this.level().playSound(this.level().isClientSide ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ALLAY_AMBIENT_WITH_ITEM, SoundSource.AMBIENT);
-            if(hadItem || newVariant != this.getVariant()) {
+            if((hadItem || newVariant != this.getVariant()) || !hasOwner) {
                 if(this.level().isClientSide) {
                     PacketDistributor.sendToServer(new BdubsVariantChangeEffectsPacket(this.getId(), false));
                 }

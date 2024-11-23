@@ -145,4 +145,10 @@ For rest of this example, the pack name is `boogapack`
 
 And that's it! Load up the game and try giving your new variant the item you defined in your json(a diamond in this case).
 
-You can add as many messages as you like too. Keeping the `messages` array blank means no messages will be sent. Not including `timed_messages` at all means there will be no timed messages.
+You can add as many messages as you like too. The `messages` and `timed_messages` fields are optional, meaning you can remove them if you don't use them.
+
+You can summon a Bdubs with a specific variant using  
+`/summon lifesizebdubs:bdubsentity ~ ~ ~ {variant:"<pack name>:<variant name>"}`
+
+For our example Booga, it would be  
+`/summon lifesizebdubs:bdubsentity ~ ~ ~ {variant:"boogapack:booga"}`
