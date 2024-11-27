@@ -79,6 +79,7 @@ NOTE: As of Life-Size Bdubs 1.0.1, multiple variants using the same item is not 
   "name": "",
   "texture": "",
   "item": "",
+  "alt_item": "",
   "messages": [
     "",
     ""
@@ -95,6 +96,7 @@ NOTE: As of Life-Size Bdubs 1.0.1, multiple variants using the same item is not 
 ### Json explained
 - name: The name shown when the Bdubs variant sends messages and dies (Text component).
 - item: The item needed to give a Bdubs entity to turn it into that variant (Item).
+- alt_item*: An alternative item to give the Bdubs entity (Item).
 - texture: The texture used for the Bdubs variant (Resource Location).
 - messages* : The list of possible messages the Bdubs variant can send once on their owner's shoulder (String array)
 - timed_messages*: A list of messages to be sent at a specific time to the owner if the Bdubs entity is on their shoulder (Array of Pair of String & Int).
@@ -150,3 +152,10 @@ You can summon a Bdubs with a specific variant using
 
 For our example Booga, it would be  
 `/summon lifesizebdubs:bdubsentity ~ ~ ~ {variant:"boogapack:booga"}`
+
+If you want to showoff your Bdubs entity, there's a special NBT tag for that!  
+`/summon lifesizebdubs:bdubsentity ~ ~ ~ {variant:"<pack name>:<variant name>", showcaseMode:true}`  
+This will summon a Bdubs entity of your variant who doesn't despawn, can't be pushed, and can't be damaged(in non-creative mode)!
+
+If you want to make sure nobody can change the variant, set its owner to yourself.   
+`/summon lifesizebdubs:bdubsentity ~ ~ ~ {variant:"<pack name>:<variant name>", showcaseMode:true, Owner:"<your username>"}`  
