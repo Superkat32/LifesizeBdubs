@@ -80,6 +80,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public int lastMessageTicks = 0;
 
     public int idleAnimTicks = 300;
+    public int ticksSinceIdleAnim = 0;
     public int waveTicks = 10;
     public int ticksSinceWave = 0;
     public int ticksSinceSpyglassWave = 0;
@@ -183,6 +184,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void setShowcaseMode(boolean showcaseMode) {
         this.entityData.set(SHOWCASE_MODE_ID, showcaseMode);
         this.setInvulnerable(showcaseMode);
+//        this.setNoAi(showcaseMode);
         this.setPushable(!showcaseMode);
         this.setShouldDespawn(!showcaseMode);
     }
@@ -266,6 +268,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.triggerAnim(controller, animString(idleAnim));
         }
         this.idleAnimTicks = this.random.nextInt(200, 1000);
+        this.ticksSinceIdleAnim = 0;
     }
 
     public void wave(boolean canCheer) {
@@ -375,7 +378,9 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void tickAnimation() {
         idleAnimTicks--;
         waveTicks--;
+        ticksSinceIdleAnim++;
         ticksSinceWave++;
+        ticksSinceSpyglassWave++;
         if(idleAnimTicks <= 0) {
             playIdleAnim();
         }
@@ -424,7 +429,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
                                 return !entity.isSpectator();
                                     }, 0f);
                             if(entityHitResult != null && entityHitResult.getEntity() == this && serverPlayer.hasLineOfSight(this)) {
-                                if(serverPlayer != this.spyglassWavedPlayer || (ticksSinceSpyglassWave >= 300 || serverPlayer.getTicksUsingItem() <= 40)) {
+                                if(serverPlayer != this.spyglassWavedPlayer || (ticksSinceSpyglassWave >= 140 || (serverPlayer.getTicksUsingItem() <= 40 && ticksSinceSpyglassWave > 20 && ticksSinceIdleAnim >= 50))) {
+                                    ticksSinceSpyglassWave = 0;
                                     this.spyglassWavedPlayer = serverPlayer;
                                     wave(false, true);
                                 }

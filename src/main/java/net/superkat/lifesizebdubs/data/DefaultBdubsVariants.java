@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.NeoForge;
+import net.superkat.lifesizebdubs.LifeSizeBdubs;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,15 +38,16 @@ public class DefaultBdubsVariants {
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/mossybdubs.png"),
                 Items.MOSS_BLOCK.getDefaultInstance(),
                 List.of(),
-                Optional.of(List.of((Pair.of("Uh oh! Time to swheep!", 12500))))
+                List.of((Pair.of("Uh oh! Time to swheep!", 12500)))
         ));
 
         bootstrap.register(BDUBS_TNT_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.tnt"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/tntbdubs.png"),
                 Items.TNT.getDefaultInstance(),
+                LifeSizeBdubs.IMPOSTER_TNT_ITEM.get().getDefaultInstance(),
                 List.of(),
-                Optional.of(List.of((Pair.of("Ahhhh! Time to swheep!!!", 12500))))
+                List.of((Pair.of("Ahhhh! Time to swheep!!!", 12500)))
         ));
 
         bootstrap.register(SCAR_VARIANT, new BdubsVariant(
@@ -57,7 +59,8 @@ public class DefaultBdubsVariants {
         bootstrap.register(GRIAN_VARIANT, new BdubsVariant(
                 Component.translatable("lifesizebdubs.variant.grian"),
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/grian.png"),
-                Items.EGG.getDefaultInstance()
+                Items.EGG.getDefaultInstance(),
+                LifeSizeBdubs.IMPOSTER_EGG_ITEM.get().getDefaultInstance()
         ));
 
         bootstrap.register(SKIZZ_VARIANT, new BdubsVariant(
@@ -84,7 +87,7 @@ public class DefaultBdubsVariants {
                 ResourceLocation.fromNamespaceAndPath(MODID, "textures/bdubs/booga.png"),
                 Items.COMMAND_BLOCK.getDefaultInstance(),
                 List.of("Booga message 1", "Booga message 2 electric boogaloo"),
-                Optional.of(List.of(Pair.of("Timed booga!", 12500)))
+                List.of(Pair.of("Timed booga!", 12500))
         ));
     }
 

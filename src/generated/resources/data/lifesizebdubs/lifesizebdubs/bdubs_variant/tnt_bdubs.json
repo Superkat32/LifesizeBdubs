@@ -4,6 +4,7 @@
   },
   "texture": "lifesizebdubs:textures/bdubs/tntbdubs.png",
   "item": "minecraft:tnt",
+  "alt_item": "lifesizebdubs:imposter_tnt",
   "messages": [],
   "timed_messages": [
     {

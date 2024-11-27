@@ -2,6 +2,7 @@ package net.superkat.lifesizebdubs;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -50,6 +51,7 @@ import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.data.DefaultBdubsVariants;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
+import net.superkat.lifesizebdubs.item.TooltipItem;
 import net.superkat.lifesizebdubs.network.BdubsClientPayloadHandler;
 import net.superkat.lifesizebdubs.network.BdubsServerPayloadHandler;
 import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
@@ -71,12 +73,16 @@ public class LifeSizeBdubs {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredHolder<Item, SpawnEggItem> BDUBS_SPAWN_EGG_ITEM = ITEMS.register("lifesizebdubs_spawn_egg", () -> new DeferredSpawnEggItem(BDUBS_ENTITY, 0xffffff, 0xffffff, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> IMPOSTER_EGG_ITEM = ITEMS.register("imposter_egg", () -> new TooltipItem(Component.translatable("item.lifesizebdubs.imposter_egg.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+    public static final DeferredHolder<Item, Item> IMPOSTER_TNT_ITEM = ITEMS.register("imposter_tnt", () -> new TooltipItem(Component.translatable("item.lifesizebdubs.imposter_tnt.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
     public static final Supplier<AttachmentType<Boolean>> LOCKED_SHOULDER_ENTITIES = ATTACHMENT_TYPES.register("locked_shoulder_entities", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
 
     //FIXME - ticks of error for timed message(10?)
     //FIXME - handle multiple variants using the same item (good luck lol)
+
+    //bdubs mech translation key
 
     public LifeSizeBdubs(IEventBus modEventBus, ModContainer modContainer) {
         //I really don't understand when to use which event - I just trial and error-ed what worked
@@ -164,6 +170,17 @@ public class LifeSizeBdubs {
     public void addCreative(BuildCreativeModeTabContentsEvent event) {
         if(event.getTabKey() == CreativeModeTabs.SPAWN_EGGS)
             event.accept(BDUBS_SPAWN_EGG_ITEM.get());
+
+        if(event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(IMPOSTER_EGG_ITEM.get());
+            event.accept(IMPOSTER_TNT_ITEM.get());
+        }
+
+        if(event.getTabKey() == CreativeModeTabs.INGREDIENTS)
+            event.accept(IMPOSTER_EGG_ITEM.get());
+
+        if(event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS)
+            event.accept(IMPOSTER_TNT_ITEM.get());
     }
 
     @SubscribeEvent

@@ -1,7 +1,9 @@
 {
-  "itemGroup.examplemod": "Example Mod Tab",
-  "block.examplemod.example_block": "Example Block",
-  "item.examplemod.example_item": "Example Item",
+  "item.lifesizebdubs.imposter_egg": "Egg",
+  "item.lifesizebdubs.imposter_egg.tooltip": "Poultry Man strikes again!",
+  "item.lifesizebdubs.imposter_tnt": "TNT",
+  "item.lifesizebdubs.imposter_tnt.tooltip": "[Intentional Game Design]",
+  "lifesizebdubs.skin.bdubsmecha": "Bdubs Engine",
 
   "lifesizebdubs.variant.bdubs": "Life-Size Bdubs",
   "lifesizebdubs.variant.mossy": "Life-Size Mossy Bdubs",
