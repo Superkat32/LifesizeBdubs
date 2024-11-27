@@ -1,6 +1,7 @@
 package net.superkat.lifesizebdubs;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,6 +28,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
@@ -36,12 +38,14 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.data.DefaultBdubsVariants;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
@@ -53,6 +57,7 @@ import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import org.slf4j.Logger;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Mod(LifeSizeBdubs.MODID)
 public class LifeSizeBdubs {
@@ -67,6 +72,9 @@ public class LifeSizeBdubs {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredHolder<Item, SpawnEggItem> BDUBS_SPAWN_EGG_ITEM = ITEMS.register("lifesizebdubs_spawn_egg", () -> new DeferredSpawnEggItem(BDUBS_ENTITY, 0xffffff, 0xffffff, new Item.Properties()));
 
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
+    public static final Supplier<AttachmentType<Boolean>> LOCKED_SHOULDER_ENTITIES = ATTACHMENT_TYPES.register("locked_shoulder_entities", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build());
+
     //FIXME - ticks of error for timed message(10?)
     //FIXME - handle multiple variants using the same item (good luck lol)
 
@@ -74,6 +82,7 @@ public class LifeSizeBdubs {
         //I really don't understand when to use which event - I just trial and error-ed what worked
         ENTITIES.register(modEventBus);
         ITEMS.register(modEventBus);
+        ATTACHMENT_TYPES.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerDatapackRegistries);
         modEventBus.addListener(this::onGatherData);
@@ -85,6 +94,7 @@ public class LifeSizeBdubs {
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(this::allowLockingShoulderEntities);
         NeoForge.EVENT_BUS.addListener(this::tickLastLockingShoulderEntity);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -130,9 +140,9 @@ public class LifeSizeBdubs {
             if(!player.getShoulderEntityLeft().isEmpty() || !player.getShoulderEntityRight().isEmpty()) {
                 LifeSizeBdubsPlayer bdubsPlayer = (LifeSizeBdubsPlayer) player;
                 if(bdubsPlayer.lifesizebdubs$lastLockTicks() <= 20) return;
-                boolean locked = bdubsPlayer.lifesizebdubs$lockedShoulderEntity();
+                boolean locked = player.getData(LOCKED_SHOULDER_ENTITIES);
                 boolean newLocked = !locked;
-                bdubsPlayer.lifesizebdubs$setLockedShoulderEntity(newLocked);
+                player.setData(LOCKED_SHOULDER_ENTITIES, newLocked);
                 if(newLocked) {
                     if(!player.level().isClientSide) {
                         player.displayClientMessage(Component.translatable("lifesizebdubs.entityshoulderlocked"), true);

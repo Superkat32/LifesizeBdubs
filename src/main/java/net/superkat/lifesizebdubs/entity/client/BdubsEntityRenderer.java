@@ -97,7 +97,7 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
 
             if(bdubs.onShoulder) {
                 float sittingRot = (float) Math.toRadians(75);
-                float ticks = bdubs.shoulderRidingPlayer.level().getDayTime();
+                float ticks = bdubs.shoulderRidingPlayer.tickCount;
                 float extraRot = (float) Math.cos((double) ticks / 5f) / 4f;
                 leftLeg.setRotX((float) (leftLegRotX / 2f + sittingRot + extraRot));
                 rightLeg.setRotX((float) (rightLegRotX / 2f + sittingRot - extraRot));

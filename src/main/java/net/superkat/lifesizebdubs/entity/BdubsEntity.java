@@ -35,7 +35,6 @@ import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import net.superkat.lifesizebdubs.network.BdubsVariantChangeEffectsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -44,12 +43,16 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.ClientUtil;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SUGAR_TICKS_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> SHOWCASE_MODE_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> PUSHABLE_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SHOULD_DESPAWN_ID = SynchedEntityData.defineId(BdubsEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     protected final String controller = "default";
@@ -111,6 +114,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         builder.define(DATA_VARIANT_ID, BdubsVariant.getIntFromVariant(BdubsVariant.DEFAULT, this.registryAccess()));
         builder.define(SUGAR_TICKS_ID, 0);
         builder.define(SHOWCASE_MODE_ID, false);
+        builder.define(PUSHABLE_ID, true);
+        builder.define(SHOULD_DESPAWN_ID, true);
     }
 
     @Override
@@ -131,6 +136,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
         compound.putInt("sugarticks", getSugarTicks());
         compound.putBoolean("showcaseMode", isShowcaseMode());
+        compound.putBoolean("pushable", pushable());
+        compound.putBoolean("shouldDespawn", shouldDespawn());
     }
 
     @Override
@@ -143,6 +150,8 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
 
         this.setSugarTicks(compound.getInt("sugarticks"));
         this.setShowcaseMode(compound.getBoolean("showcaseMode"));
+        this.setPushable(compound.getBoolean("pushable"));
+        this.setShouldDespawn(compound.getBoolean("shouldDespawn"));
     }
 
     @Override
@@ -174,11 +183,28 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     public void setShowcaseMode(boolean showcaseMode) {
         this.entityData.set(SHOWCASE_MODE_ID, showcaseMode);
         this.setInvulnerable(showcaseMode);
-        this.setNoAi(showcaseMode);
+        this.setPushable(!showcaseMode);
+        this.setShouldDespawn(!showcaseMode);
     }
 
     public boolean isShowcaseMode() {
         return this.entityData.get(SHOWCASE_MODE_ID);
+    }
+
+    public void setPushable(boolean pushable) {
+        this.entityData.set(PUSHABLE_ID, pushable);
+    }
+
+    public boolean pushable() {
+        return this.entityData.get(PUSHABLE_ID);
+    }
+
+    public void setShouldDespawn(boolean shouldDespawn) {
+        this.entityData.set(SHOULD_DESPAWN_ID, shouldDespawn);
+    }
+
+    public boolean shouldDespawn() {
+        return this.entityData.get(SHOULD_DESPAWN_ID);
     }
 
     public void setOnShoulder(boolean onShoulder, LivingEntity player) {
@@ -363,7 +389,7 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
         super.tick();
 
         ownerInteractionTicks++;
-        if(ownerInteractionTicks >= 6000 && !isShowcaseMode()) { //5 minutes
+        if(ownerInteractionTicks >= 6000 && (!isShowcaseMode() || shouldDespawn())) { //5 minutes
             triggerAnim(controller, animString(DESPAWN_ANIM));
             if(ownerInteractionTicks >= 6045) {
                 this.discard();
@@ -481,6 +507,11 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
             this.level().addParticle(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS, this.getX(), this.getEyeY(), this.getZ(), this.random.nextGaussian() / 24, 0.01, this.random.nextGaussian() / 24);
         }
         this.level().addParticle(ParticleTypes.SONIC_BOOM, this.getX(), this.getEyeY(), this.getZ(), 0, 0, 0);
+    }
+
+    @Override
+    public boolean isPushable() {
+        return super.isPushable() && this.pushable();
     }
 
     @Override

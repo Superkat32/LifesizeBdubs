@@ -66,7 +66,7 @@ For this example, we will be adding a new variant called "Booga". Let's begin!
 Replace all `boogapack` with your datapack name, and all `booga` with your Bdubs variant name.
 
 Place your variant texture into:  
-`data/<your pack name>/bdubs/<your variant name>.png`
+`resources/assets/<your pack name>/textures/bdubs/<your variant name>.png`
 
 Copy-paste the following template into:  
 `data/<your pack name>/lifesizebdubs/bdubs_variant/<your variant name>.json`  
@@ -110,7 +110,7 @@ For this example, we will be adding a new variant called "Booga". Let's begin!
 #### Add your skin texture
 
 Add a Minecraft skin texture in:  
-`data/<your pack name here>/bdubs/booga.png`
+`resources/assets/<your pack name>/textures/bdubs/booga.png`
 
 #### Add your json file
 
