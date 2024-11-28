@@ -521,6 +521,13 @@ public class BdubsEntity extends ShoulderRidingEntity implements VariantHolder<B
     }
 
     @Override
+    public void setDeltaMovement(Vec3 deltaMovement) {
+        if(!isShowcaseMode() || pushable()) { //no fishing rod pull
+            super.setDeltaMovement(deltaMovement);
+        }
+    }
+
+    @Override
     protected @Nullable SoundEvent getAmbientSound() {
         return SoundEvents.AXOLOTL_IDLE_AIR;
     }
