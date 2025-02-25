@@ -3,7 +3,10 @@
     "translate": "lifesizebdubs.variant.timmy"
   },
   "texture": "lifesizebdubs:textures/bdubs/timmy.png",
-  "item": "minecraft:saddle",
+  "item": {
+    "count": 1,
+    "id": "minecraft:saddle"
+  },
   "messages": [
     "I'm a toy...",
     "I'm not a toy!"

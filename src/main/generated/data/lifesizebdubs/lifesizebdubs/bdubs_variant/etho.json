@@ -3,5 +3,8 @@
     "translate": "lifesizebdubs.variant.etho"
   },
   "texture": "lifesizebdubs:textures/bdubs/etho.png",
-  "item": "minecraft:ladder"
+  "item": {
+    "count": 1,
+    "id": "minecraft:ladder"
+  }
 }

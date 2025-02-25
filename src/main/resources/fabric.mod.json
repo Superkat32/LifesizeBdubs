@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "lifesizebdubs",
+	"version": "${version}",
+	"name": "Life-Size Bdubs",
+	"description": "Befriend a life-size replica of BDoubleO100(Bdubs)!",
+	"authors": [
+		"Superkat32"
+	],
+	"contact": {
+		"sources": "https://github.com/Superkat32/LifesizeBdubs"
+	},
+	"license": "MIT",
+	"icon": "assets/lifesizebdubs/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.superkat.lifesizebdubs.LifeSizeBdubs"
+		],
+		"client": [
+			"net.superkat.lifesizebdubs.LifeSizeBdubsClient"
+		],
+		"fabric-datagen": [
+			"net.superkat.lifesizebdubs.LifeSizeBdubsDataGenerator"
+		]
+	},
+	"mixins": [
+		"lifesizebdubs.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

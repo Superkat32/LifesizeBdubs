@@ -1,17 +1,11 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "net.superkat.lifesizebdubs.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "client": [
-    "LivingEntityRendererMixin",
-    "PlayerRendererMixin",
-    "SimpleTextureMixin"
-  ],
-  "mixins": [
-    "PlayerMixin"
-  ]
+	"required": true,
+	"package": "net.superkat.lifesizebdubs.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ExampleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

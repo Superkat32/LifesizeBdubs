@@ -1,12 +1,9 @@
 package net.superkat.lifesizebdubs.data;
 
-import com.google.common.collect.Lists;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-//just a simple class to one line each message
 public class DefaultBdubsMessages {
 
     public static List<String> DEFAULT_BDUBS_VARIANT_MESSAGES = List.of(
@@ -48,11 +45,8 @@ public class DefaultBdubsMessages {
             "Ideally, we figure out how many blocks Tango is away from me, multiply that by 1.618, and then that can give us the distance you need to be away from him."
     );
 
-    //incase I decide to make the messages components - not doing now because of time
-//    public static List<Component> stringListToLiteralComponent(List<String> stringList) {
-//        List<Component> componentList = Lists.newArrayList();
-//        componentList.addAll(stringList.stream().map(Component::literal).toList());
-//        return componentList;
-//    }
+    public static List<Text> stringToText(List<String> stringList) {
+        return stringList.stream().map(Text::of).toList();
+    }
 
 }

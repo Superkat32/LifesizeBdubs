@@ -3,7 +3,16 @@
     "translate": "lifesizebdubs.variant.bdubs"
   },
   "texture": "lifesizebdubs:textures/bdubs/bdubs.png",
-  "item": "minecraft:clock",
+  "timed_messages": [
+    {
+      "msg": "Time to swheep!",
+      "time": 12500
+    }
+  ],
+  "item": {
+    "count": 1,
+    "id": "minecraft:clock"
+  },
   "messages": [
     "I'm gonna rip Tango's face off for stealing my horse!",
     "Little fella? I'm 5'10\" (1.78m)!! That's average height!!!",
@@ -41,11 +50,5 @@
     "Boom! ... nothing.",
     "Uh oh!",
     "Ideally, we figure out how many blocks Tango is away from me, multiply that by 1.618, and then that can give us the distance you need to be away from him."
-  ],
-  "timed_messages": [
-    {
-      "msg": "Time to swheep!",
-      "time": 12500
-    }
   ]
 }

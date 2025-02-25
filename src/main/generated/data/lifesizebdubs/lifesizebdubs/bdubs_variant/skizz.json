@@ -3,5 +3,8 @@
     "translate": "lifesizebdubs.variant.skizz"
   },
   "texture": "lifesizebdubs:textures/bdubs/skizz.png",
-  "item": "minecraft:snowball"
+  "item": {
+    "count": 1,
+    "id": "minecraft:snowball"
+  }
 }
