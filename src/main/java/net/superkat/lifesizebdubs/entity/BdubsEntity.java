@@ -131,10 +131,6 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         if(nbt.contains("showcaseMode")) this.setShowcaseMode(nbt.getBoolean("showcaseMode"));
         if(nbt.contains("pushable")) this.setPushable(nbt.getBoolean("pushable"));
         if(nbt.contains("shouldDespawn")) this.setShouldDespawn(nbt.getBoolean("shouldDespawn"));
-//        this.setSugarTicks(nbt.getInt("sugarticks"));
-//        this.setShowcaseMode(nbt.contains("showcaseMode") && nbt.getBoolean("showcaseMode"));
-//        this.setPushable(!nbt.contains("pushable") || nbt.getBoolean("pushable"));
-//        this.setShouldDespawn(!nbt.contains("shouldDespawn") || nbt.getBoolean("shouldDespawn"));
 
         if(nbt.contains("profile")) {
             ProfileComponent.CODEC.parse(NbtOps.INSTANCE, nbt.get("profile"))
@@ -166,6 +162,9 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
     @Override
     public Text getDisplayName() {
         if(this.isDead()) {
+            if(this.getProfile() != null) {
+                return Text.of(this.getProfile().name().get());
+            }
             return this.getVariant().getName();
         }
         return super.getDisplayName();
@@ -205,6 +204,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
     //likely called serverside
     public void tickMessages() {
         if(this.getOwner() == null || !this.onShoulder) return;
+        if(this.getProfile() != null) return;
         messageTicks--;
         lastMessageTicks++;
         tickMessageList();
