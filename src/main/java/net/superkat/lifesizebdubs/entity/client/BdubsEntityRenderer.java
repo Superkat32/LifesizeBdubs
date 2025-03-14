@@ -1,10 +1,13 @@
 package net.superkat.lifesizebdubs.entity.client;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -50,8 +53,15 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
 
     @Override
     public Identifier getTextureLocation(BdubsEntity animatable) {
-        BdubsVariant variant = animatable.getVariant();
-        return variant.getTexture();
+        ProfileComponent profileComponent = animatable.getProfile();
+        if(profileComponent != null) {
+            PlayerSkinProvider skinProvider = MinecraftClient.getInstance().getSkinProvider();
+            return skinProvider.getSkinTextures(profileComponent.gameProfile()).texture();
+        } else {
+            BdubsVariant variant = animatable.getVariant();
+            return variant.getTexture();
+        }
+
     }
 
     public static class BdubsEntityModel extends DefaultedEntityGeoModel<BdubsEntity> {
@@ -71,16 +81,17 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
             GeoBone head = getAnimationProcessor().getBone("Head");
 
             if (head != null) {
+                if(animatable.isDead()) return;
                 EntityModelData entityData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
 
                 head.setRotX(head.getRotX() + entityData.headPitch() * MathHelper.RADIANS_PER_DEGREE);
                 head.setRotY(head.getRotY() + entityData.netHeadYaw() * MathHelper.RADIANS_PER_DEGREE);
 
-//                if(animatable.onShoulder) {
-//                    head.setRotX(head.getRotX() / 2 - animatable.shoulderRidingPlayer.getXRot() * Mth.DEG_TO_RAD);
-//                    float netHeadYaw = animatable.shoulderRidingPlayer.getYHeadRot() - animatable.shoulderRidingPlayer.yBodyRot;
-//                    head.setRotY(head.getRotY() / 2 - netHeadYaw * Mth.DEG_TO_RAD);
-//                }
+                if(animatable.onShoulder) {
+                    head.setRotX(head.getRotX() / 2 - animatable.shoulderRidingPlayer.getPitch() * MathHelper.RADIANS_PER_DEGREE);
+                    float netHeadYaw = animatable.shoulderRidingPlayer.getHeadYaw() - animatable.shoulderRidingPlayer.getBodyYaw();
+                    head.setRotY(head.getRotY() / 2 - netHeadYaw * MathHelper.RADIANS_PER_DEGREE);
+                }
             }
             setLegRotation(animatable, instanceId, animationState);
         }
@@ -93,17 +104,17 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
             float limbSwing = animState.getLimbSwing();
             float limbSwingAmount = animState.getLimbSwingAmount();
 
-//            if(bdubs.onShoulder) {
-//                float sittingRot = (float) Math.toRadians(75);
-//                float ticks = bdubs.shoulderRidingPlayer.tickCount;
-//                float extraRot = (float) Math.cos((double) ticks / 5f) / 4f;
-//                leftLeg.setRotX((float) (leftLegRotX / 2f + sittingRot + extraRot));
-//                rightLeg.setRotX((float) (rightLegRotX / 2f + sittingRot - extraRot));
-//            } else {
+            if(bdubs.onShoulder) {
+                float sittingRot = (float) Math.toRadians(75);
+                float ticks = bdubs.shoulderRidingPlayer.age;
+                float extraRot = (float) Math.cos((double) ticks / 5f) / 4f;
+                leftLeg.setRotX((float) (leftLegRotX / 2f + sittingRot + extraRot));
+                rightLeg.setRotX((float) (rightLegRotX / 2f + sittingRot - extraRot));
+            } else {
                 //magic numbers from HumanoidModel#setupAnim without multiplying by 1.4f to move less because bdubs has tiny legs lol
                 leftLeg.setRotX((float) (leftLegRotX + (Math.cos(limbSwing * 0.6662f) * limbSwingAmount)));
                 rightLeg.setRotX((float) (rightLegRotX + (Math.cos(limbSwing * 0.6662f + Math.PI) * limbSwingAmount)));
-//            }
+            }
         }
     }
 }

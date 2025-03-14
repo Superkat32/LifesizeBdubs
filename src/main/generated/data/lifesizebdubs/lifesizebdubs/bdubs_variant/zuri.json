@@ -1,0 +1,8 @@
+{
+  "name": "Zuri",
+  "texture": "minecraft:textures/entity/player/slim/zuri.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:diamond"
+  }
+}

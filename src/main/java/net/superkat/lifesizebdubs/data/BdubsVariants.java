@@ -88,10 +88,92 @@ public class BdubsVariants {
                 .setMessages(DefaultBdubsMessages.stringToText(List.of("I'm a toy...", "I'm not a toy!")))
                 .build()
         );
+
+        debugBootstrap(registerable);
     }
 
     public static RegistryKey<BdubsVariant> of(String path) {
         return RegistryKey.of(LifeSizeBdubs.BDUBS_VARIANT_KEY, Identifier.of(MOD_ID, path));
+    }
+
+    public static final RegistryKey<BdubsVariant> STEVE = of("steve");
+    public static final RegistryKey<BdubsVariant> ALEX = of("alex");
+    public static final RegistryKey<BdubsVariant> ARI = of("ari");
+    public static final RegistryKey<BdubsVariant> EFE = of("efe");
+    public static final RegistryKey<BdubsVariant> KAI = of("kai");
+    public static final RegistryKey<BdubsVariant> MAKENA = of("makena");
+    public static final RegistryKey<BdubsVariant> NOOR = of("noor");
+    public static final RegistryKey<BdubsVariant> SUNNY = of("sunny");
+    public static final RegistryKey<BdubsVariant> ZURI = of("zuri");
+
+    public static void debugBootstrap(Registerable<BdubsVariant> registerable) {
+        registerable.register(STEVE, new BdubsBuilder(
+                Text.of("Steve"),
+                Identifier.ofVanilla("textures/entity/player/slim/steve.png"),
+                Items.SUGAR.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(ALEX, new BdubsBuilder(
+                Text.of("Alex"),
+                Identifier.ofVanilla("textures/entity/player/slim/alex.png"),
+                Items.SUGAR.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(ARI, new BdubsBuilder(
+                Text.of("Ari"),
+                Identifier.ofVanilla("textures/entity/player/slim/ari.png"),
+                Items.SUGAR.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(EFE, new BdubsBuilder(
+                Text.of("Efe"),
+                Identifier.ofVanilla("textures/entity/player/slim/efe.png"),
+                Items.SUGAR.getDefaultStack())
+                .setAltItem(Items.AMETHYST_SHARD.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(KAI, new BdubsBuilder(
+                Text.of("Kai"),
+                Identifier.ofVanilla("textures/entity/player/slim/kai.png"),
+                Items.AMETHYST_SHARD.getDefaultStack())
+                .setAltItem(Items.SUGAR.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(MAKENA, new BdubsBuilder(
+                Text.of("Makena"),
+                Identifier.ofVanilla("textures/entity/player/slim/makena.png"),
+                Items.AMETHYST_SHARD.getDefaultStack())
+                .setAltItem(Items.DIAMOND.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(NOOR, new BdubsBuilder(
+                Text.of("Noor"),
+                Identifier.ofVanilla("textures/entity/player/slim/noor.png"),
+                Items.DIAMOND.getDefaultStack())
+                .setAltItem(Items.SUGAR.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(SUNNY, new BdubsBuilder(
+                Text.of("Sunny"),
+                Identifier.ofVanilla("textures/entity/player/slim/sunny.png"),
+                Items.SUGAR.getDefaultStack())
+                .setAltItem(Items.DIAMOND.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(ZURI, new BdubsBuilder(
+                Text.of("Zuri"),
+                Identifier.ofVanilla("textures/entity/player/slim/zuri.png"),
+                Items.DIAMOND.getDefaultStack())
+                .build()
+        );
     }
 
 }

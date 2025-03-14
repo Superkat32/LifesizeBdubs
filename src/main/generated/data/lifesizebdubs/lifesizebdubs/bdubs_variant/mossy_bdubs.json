@@ -3,14 +3,14 @@
     "translate": "lifesizebdubs.variant.mossy"
   },
   "texture": "lifesizebdubs:textures/bdubs/mossybdubs.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:moss_block"
+  },
   "timed_messages": [
     {
       "msg": "Uh oh! Time to swheep!",
       "time": 12500
     }
-  ],
-  "item": {
-    "count": 1,
-    "id": "minecraft:moss_block"
-  }
+  ]
 }

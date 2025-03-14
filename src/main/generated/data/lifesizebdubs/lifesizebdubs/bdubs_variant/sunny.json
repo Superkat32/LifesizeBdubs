@@ -1,0 +1,12 @@
+{
+  "name": "Sunny",
+  "texture": "minecraft:textures/entity/player/slim/sunny.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:sugar"
+  },
+  "alt_item": {
+    "count": 1,
+    "id": "minecraft:diamond"
+  }
+}

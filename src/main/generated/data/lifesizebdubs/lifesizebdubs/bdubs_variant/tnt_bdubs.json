@@ -3,14 +3,14 @@
     "translate": "lifesizebdubs.variant.tnt"
   },
   "texture": "lifesizebdubs:textures/bdubs/tntbdubs.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:tnt"
+  },
   "timed_messages": [
     {
       "msg": "AhhhAhhhh! Time to swheep!!!",
       "time": 12500
     }
-  ],
-  "item": {
-    "count": 1,
-    "id": "minecraft:tnt"
-  }
+  ]
 }

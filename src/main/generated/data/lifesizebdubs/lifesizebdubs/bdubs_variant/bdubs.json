@@ -3,12 +3,6 @@
     "translate": "lifesizebdubs.variant.bdubs"
   },
   "texture": "lifesizebdubs:textures/bdubs/bdubs.png",
-  "timed_messages": [
-    {
-      "msg": "Time to swheep!",
-      "time": 12500
-    }
-  ],
   "item": {
     "count": 1,
     "id": "minecraft:clock"
@@ -50,5 +44,11 @@
     "Boom! ... nothing.",
     "Uh oh!",
     "Ideally, we figure out how many blocks Tango is away from me, multiply that by 1.618, and then that can give us the distance you need to be away from him."
+  ],
+  "timed_messages": [
+    {
+      "msg": "Time to swheep!",
+      "time": 12500
+    }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "name": "Noor",
+  "texture": "minecraft:textures/entity/player/slim/noor.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:diamond"
+  },
+  "alt_item": {
+    "count": 1,
+    "id": "minecraft:sugar"
+  }
+}

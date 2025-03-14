@@ -12,6 +12,8 @@ public class BdubsServerPayloadHandler {
         PayloadTypeRegistry.playC2S().register(BdubsEffectPacket.ID, BdubsEffectPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(BdubsEffectPacket.ID, BdubsEffectPacket.CODEC);
 
+        PayloadTypeRegistry.playS2C().register(BdubsMessagePacket.ID, BdubsMessagePacket.CODEC);
+
         ServerPlayNetworking.registerGlobalReceiver(BdubsEffectPacket.ID, BdubsServerPayloadHandler::onBdubsVariantChange);
     }
 

@@ -8,7 +8,7 @@ import net.superkat.lifesizebdubs.LifeSizeBdubs;
 
 public record BdubsEffectPacket(int bdubsId, boolean evenFunnierParticles) implements CustomPayload {
 
-    public static final CustomPayload.Id<BdubsEffectPacket> ID = new Id<>(Identifier.of(LifeSizeBdubs.MOD_ID));
+    public static final CustomPayload.Id<BdubsEffectPacket> ID = new Id<>(Identifier.of(LifeSizeBdubs.MOD_ID, "bdubs_variant_change"));
     public static final PacketCodec<RegistryByteBuf, BdubsEffectPacket> CODEC = CustomPayload.codecOf(BdubsEffectPacket::write, BdubsEffectPacket::new);
 
     public BdubsEffectPacket(RegistryByteBuf buf) {

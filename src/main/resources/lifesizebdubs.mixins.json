@@ -3,9 +3,13 @@
 	"package": "net.superkat.lifesizebdubs.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"PlayerEntityMixin",
+		"PlayerEntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	}
+	},
+	"client": [
+		"LivingEntityRendererMixin"
+	]
 }

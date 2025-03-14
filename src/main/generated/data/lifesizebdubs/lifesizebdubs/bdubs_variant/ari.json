@@ -1,0 +1,8 @@
+{
+  "name": "Ari",
+  "texture": "minecraft:textures/entity/player/slim/ari.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:sugar"
+  }
+}

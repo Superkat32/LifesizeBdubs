@@ -30,10 +30,9 @@ public class LifeSizeBdubsDataGenerator implements DataGeneratorEntrypoint {
 		callback.add("name", 1);
 		callback.add("texture", 2);
 		callback.add("item", 3);
-		callback.add("altItem", 4);
-		callback.add("giftables", 5);
+		callback.add("alt_item", 4);
 		callback.add("messages", 6);
-		callback.add("timedMessages", 7);
+		callback.add("timed_messages", 7);
 	}
 
 	public static class BdubsBuilderProvider extends FabricDynamicRegistryProvider {

@@ -30,7 +30,6 @@ public class BdubsVariant {
                     Identifier.CODEC.fieldOf("texture").forGetter(bdubs -> bdubs.texture),
                     ItemStack.CODEC.fieldOf("item").forGetter(bdubs -> bdubs.item),
                     ItemStack.CODEC.optionalFieldOf("alt_item").forGetter(bdubs -> bdubs.altItem),
-                    ItemStack.CODEC.listOf().optionalFieldOf("giftables").forGetter(bdubs -> bdubs.giftables),
                     TextCodecs.CODEC.listOf().optionalFieldOf("messages").forGetter(bdubs -> bdubs.messages),
                     Codec.mapPair(
                             TextCodecs.CODEC.fieldOf("msg"),
@@ -47,17 +46,15 @@ public class BdubsVariant {
     public final ItemStack item;
 
     public final Optional<ItemStack> altItem;
-    public final Optional<List<ItemStack>> giftables;
 
     public final Optional<List<Text>> messages;
     public final Optional<List<Pair<Text, Integer>>> timedMessages;
 
-    public BdubsVariant(Text name, Identifier texture, ItemStack item, Optional<ItemStack> altItem, Optional<List<ItemStack>> giftables, Optional<List<Text>> messages, Optional<List<Pair<Text, Integer>>> timedMessages) {
+    public BdubsVariant(Text name, Identifier texture, ItemStack item, Optional<ItemStack> altItem, Optional<List<Text>> messages, Optional<List<Pair<Text, Integer>>> timedMessages) {
         this.name = name;
         this.texture = texture;
         this.item = item;
         this.altItem = altItem;
-        this.giftables = giftables;
         this.messages = messages;
         this.timedMessages = timedMessages;
     }
@@ -112,10 +109,6 @@ public class BdubsVariant {
 
     public Optional<ItemStack> getAltItem() {
         return altItem;
-    }
-
-    public Optional<List<ItemStack>> getGiftables() {
-        return giftables;
     }
 
     public Optional<List<Text>> getMessages() {

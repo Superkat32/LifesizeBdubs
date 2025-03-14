@@ -1,6 +1,10 @@
 package net.superkat.lifesizebdubs.entity;
 
+import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.entity.SkullBlockEntity;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.VariantHolder;
@@ -17,6 +21,7 @@ import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -34,6 +39,7 @@ import net.minecraft.world.World;
 import net.superkat.lifesizebdubs.LifeSizeBdubs;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.network.BdubsEffectPacket;
+import net.superkat.lifesizebdubs.network.BdubsMessagePacket;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -41,9 +47,12 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public class BdubsEntity extends TameableShoulderEntity implements VariantHolder<BdubsVariant>, GeoEntity {
     private static final TrackedData<Integer> VARIANT_ID = DataTracker.registerData(BdubsEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -51,9 +60,21 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
     private static final TrackedData<Boolean> SHOWCASE_MODE_ID = DataTracker.registerData(BdubsEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> PUSHABLE_ID = DataTracker.registerData(BdubsEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> SHOULD_DESPAWN_ID = DataTracker.registerData(BdubsEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Optional<UUID>> PROFILE_UUID_ID = DataTracker.registerData(BdubsEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
+
+    @Nullable
+    public ProfileComponent profile;
     public int ownerInteractionTicks = 0;
+
+    public boolean onShoulder = false;
+    public PlayerEntity shoulderRidingPlayer = null;
+//    public int messageTicks = 1200;
+    public int messageTicks = 10;
+    public int lastMessageTicks = 0;
+    public List<Text> lastMessages = new ArrayList<>();
+    public Text lastTimedMessage = null;
 
     public int idleAnimTicks = 300;
     public int ticksSinceIdleAnim = 0;
@@ -64,6 +85,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
     public BdubsEntity(EntityType<? extends TameableShoulderEntity> entityType, World world) {
         super(entityType, world);
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0f);
     }
 
     @Override
@@ -75,6 +97,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         builder.add(SHOWCASE_MODE_ID, false);
         builder.add(PUSHABLE_ID, true);
         builder.add(SHOULD_DESPAWN_ID, true);
+        builder.add(PROFILE_UUID_ID, Optional.empty());
     }
 
     @Override
@@ -90,6 +113,11 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         nbt.putBoolean("showcaseMode", isShowcaseMode());
         nbt.putBoolean("pushable", pushable());
         nbt.putBoolean("shouldDespawn", shouldDespawn());
+
+        if(this.profile != null && this.getProfileUuid().isPresent()) nbt.putUuid("profile_uuid", this.getProfileUuid().get());
+//        if(this.profile != null) {
+//            nbt.put("profile", ProfileComponent.CODEC.encodeStart(NbtOps.INSTANCE, this.profile).getOrThrow());
+//        }
     }
 
     @Override
@@ -99,10 +127,22 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         BdubsVariant variant = BdubsVariant.fromNbt(this.getRegistryManager(), nbt);
         if(variant != null) this.setVariant(variant);
 
-        this.setSugarTicks(nbt.getInt("sugarticks"));
-        this.setShowcaseMode(nbt.contains("showcaseMode") && nbt.getBoolean("showcaseMode"));
-        this.setPushable(!nbt.contains("pushable") || nbt.getBoolean("pushable"));
-        this.setShouldDespawn(!nbt.contains("shouldDespawn") || nbt.getBoolean("shouldDespawn"));
+        if(nbt.contains("sugarticks")) this.setSugarTicks(nbt.getInt("sugarticks"));
+        if(nbt.contains("showcaseMode")) this.setShowcaseMode(nbt.getBoolean("showcaseMode"));
+        if(nbt.contains("pushable")) this.setPushable(nbt.getBoolean("pushable"));
+        if(nbt.contains("shouldDespawn")) this.setShouldDespawn(nbt.getBoolean("shouldDespawn"));
+//        this.setSugarTicks(nbt.getInt("sugarticks"));
+//        this.setShowcaseMode(nbt.contains("showcaseMode") && nbt.getBoolean("showcaseMode"));
+//        this.setPushable(!nbt.contains("pushable") || nbt.getBoolean("pushable"));
+//        this.setShouldDespawn(!nbt.contains("shouldDespawn") || nbt.getBoolean("shouldDespawn"));
+
+        if(nbt.contains("profile")) {
+            ProfileComponent.CODEC.parse(NbtOps.INSTANCE, nbt.get("profile"))
+                    .resultOrPartial(s -> LifeSizeBdubs.LOGGER.error("Failed to load profile for Bdubs: {}", s))
+                    .ifPresent(this::setProfile);
+        }
+        if(nbt.contains("profile_uuid")) this.setProfileUuid(nbt.getUuid("profile_uuid"));
+
     }
 
     @Override
@@ -136,6 +176,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         super.tick();
 
         this.ownerInteractionTicks++;
+
         if(this.ownerInteractionTicks >= 6000 && (!isShowcaseMode() || shouldDespawn())) {
             BdubsAnims.triggerAnim(this, BdubsAnims.DESPAWN_ANIM);
             if(this.ownerInteractionTicks >= 6045) this.discard();
@@ -144,9 +185,9 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
         int sugarTicks = this.getSugarTicks();
         if(sugarTicks > 0) this.setSugarTicks(sugarTicks - 1);
-        if(!this.getWorld().isClient()) {
-            this.tickAnimation();
-        }
+
+        if(this.getWorld().isClient()) return;
+        this.tickAnimation();
     }
 
     public void tickAnimation() {
@@ -159,6 +200,72 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         if(idleAnimTicks <= 0) playIdleAnim();
         if(waveTicks == 0) this.wave(true);
         tryWavingAtSpyglass();
+    }
+
+    //likely called serverside
+    public void tickMessages() {
+        if(this.getOwner() == null || !this.onShoulder) return;
+        messageTicks--;
+        lastMessageTicks++;
+        tickMessageList();
+        tickTimedMessages();
+    }
+
+    private void tickMessageList() {
+        BdubsVariant variant = this.getVariant();
+        if(messageTicks > 0 || variant.getMessages().isEmpty()) return;
+        List<Text> messages = variant.getMessages().get();
+
+        Text sentMessage = null;
+        for (int i = 0; i < 10; i++) {
+            int msgIndex = this.random.nextInt(messages.size());
+            Text message = messages.get(msgIndex);
+            if(message == null || message.getString().isEmpty() || lastMessages.contains(message)) continue;
+
+            sentMessage = message;
+            break;
+        }
+
+        if(sentMessage != null) {
+            sendMessageToOwner(sentMessage);
+            lastMessages.addFirst(sentMessage);
+            int maxLastMessages = messages.size() > 5 ? 5 : messages.size() - 1;
+            if (lastMessages.size() > maxLastMessages) {
+                lastMessages.removeLast();
+            }
+        }
+
+        messageTicks = this.random.nextBetween(7500, 10000);
+    }
+
+    private void tickTimedMessages() {
+        int time = (int) this.getWorld().getTimeOfDay();
+        BdubsVariant variant = this.getVariant();
+        if(variant.getTimedMessages().isEmpty()) return;
+
+        List<Pair<Text, Integer>> timedMessages = variant.getTimedMessages().get();
+        for (Pair<Text, Integer> message : timedMessages) {
+            if(message.getSecond() == time) {
+                Text msg = message.getFirst();
+                if(msg == null || msg.getString().isEmpty()) continue;
+
+                boolean isPreviousMessage = msg.equals(lastTimedMessage);
+                boolean sendMessage = !isPreviousMessage || lastMessageTicks >= 20;
+                if(!sendMessage) continue;
+
+                lastTimedMessage = msg;
+                lastMessageTicks = 0;
+                sendMessageToOwner(msg);
+            }
+        }
+    }
+
+    public void sendMessageToOwner(Text message) {
+        if(this.getOwner() instanceof ServerPlayerEntity owner) {
+            BdubsVariant variant = getVariant();
+            Text sentMessage = Text.translatable("entity.lifesizebdubs.funnybdubsmessage", variant.getName(), message);
+            ServerPlayNetworking.send(owner, new BdubsMessagePacket(sentMessage, false));
+        }
     }
 
     public void playIdleAnim() {
@@ -222,6 +329,9 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         ActionResult sugarResult = feedPureSugar(player, hand);
         if(sugarResult != ActionResult.PASS) return sugarResult;
 
+        ActionResult mountResult = this.attemptMountPlayer(player, hand);
+        if(mountResult != ActionResult.PASS) return mountResult;
+
         return super.interactMob(player, hand);
     }
 
@@ -231,6 +341,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         boolean isOwner = hasOwner && player == this.getOwner();
         boolean bdubsHadItem = this.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
         boolean consumeItem = true;
+        boolean actuallySetVariant = true;
 
         if(this.isShowcaseMode() && hasOwner) {
             if(!isOwner) return ActionResult.PASS; //only let owner do things
@@ -242,26 +353,35 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         BdubsVariant currentVariant = this.getVariant();
         Set<BdubsVariant> variantsWithItem = BdubsVariant.variantsWithItem(this.getRegistryManager(), item);
         if(variantsWithItem.isEmpty()) return ActionResult.PASS;
+        List<BdubsVariant> sortedVariants = variantsWithItem.stream().sorted(Comparator.comparing(o -> o.getName().getString())).toList();
 
         if(variantsWithItem.size() > 1 && variantsWithItem.contains(currentVariant)) {
             //cycle through variants
-            List<BdubsVariant> sortedVariants = variantsWithItem.stream().sorted(Comparator.comparing(o -> o.getName().getString())).toList();
             int currentIndex = sortedVariants.indexOf(currentVariant);
             int newIndex = (currentIndex + 1) >= sortedVariants.size() ? 0 : currentIndex + 1;
             newVariant = sortedVariants.get(newIndex);
 
             consumeItem = false;
         } else {
-            newVariant = variantsWithItem.stream().toList().getFirst();
+            //choose random variant
+            int variantIndex = this.getRandom().nextInt(sortedVariants.size());
+            newVariant = sortedVariants.get(variantIndex);
+            //let server set variant to prevent switching between 2 variants for a split second on the client
+            actuallySetVariant = !this.getWorld().isClient();
         }
 
         if(newVariant == null || currentVariant == newVariant) return ActionResult.PASS;
 
-        //if item is sugar, player needs to be sneaking to activate
-        if(item.isOf(Items.SUGAR) && !player.isSneaking()) return ActionResult.PASS;
+        //if item is sugar, player needs to be sneaking to cycle through variants
+        if(item.isOf(Items.SUGAR)) {
+            if(hasOwner && !player.isSneaking()) return ActionResult.PASS;
+        }
 
         this.equipStack(EquipmentSlot.MAINHAND, consumeItem ? item.split(1) : item);
-        this.setVariant(newVariant);
+        if(actuallySetVariant) {
+            this.setVariant(newVariant);
+        }
+
         this.setOwner(player);
         this.getWorld().playSound(this.getWorld().isClient() ? player : null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_ALLAY_AMBIENT_WITH_ITEM, SoundCategory.AMBIENT);
         if(!hasOwner || bdubsHadItem) {
@@ -286,6 +406,19 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         sendEffectUpdate(true);
         BdubsAnims.triggerAnim(this, BdubsAnims.GIVEN_SUGAR_ANIM);
 
+        return ActionResult.SUCCESS;
+    }
+
+    public ActionResult attemptMountPlayer(PlayerEntity player, Hand hand) {
+        ItemStack item = player.getStackInHand(hand);
+        boolean hasOwner = this.getOwnerUuid() != null;
+        boolean isOwner = hasOwner && player == this.getOwner();
+        boolean bdubsHadItem = this.getEquippedStack(EquipmentSlot.MAINHAND) != ItemStack.EMPTY;
+
+        if(!isOwner || !bdubsHadItem || isShowcaseMode() || item.isOf(Items.SPYGLASS)) return ActionResult.PASS;
+        if(!(player instanceof ServerPlayerEntity serverPlayer)) return ActionResult.PASS;
+        ownerInteractionTicks = 0;
+        this.mountOnto(serverPlayer);
         return ActionResult.SUCCESS;
     }
 
@@ -333,7 +466,42 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         this.getWorld().addParticle(ParticleTypes.SONIC_BOOM, this.getX(), this.getEyeY(), this.getZ(), 0, 0, 0);
     }
 
+    public void setProfile(@Nullable ProfileComponent profile) {
+        synchronized (this) {
+            this.profile = profile;
+        }
 
+        this.loadProfileProperties();
+    }
+
+    private void loadProfileProperties() {
+        if(this.profile != null && !this.profile.isCompleted()) {
+            this.profile.getFuture().thenAcceptAsync(profileComponent -> {
+                this.profile = profileComponent;
+                this.setProfileUuid(profileComponent.gameProfile().getId());
+            }, SkullBlockEntity.EXECUTOR);
+        }
+    }
+
+    @Nullable
+    public ProfileComponent getProfile() {
+        if(this.profile == null && this.getProfileUuid().isPresent()) {
+            this.setProfileUuid(this.getProfileUuid().get());
+        }
+        return this.profile;
+    }
+
+    public void setProfileUuid(UUID uuid) {
+        this.dataTracker.set(PROFILE_UUID_ID, Optional.ofNullable(uuid));
+
+        SkullBlockEntity.fetchProfileByUuid(uuid).thenAccept(gameProfile -> {
+            gameProfile.ifPresent(value -> this.profile = new ProfileComponent(value));
+        });
+    }
+
+    public Optional<UUID> getProfileUuid() {
+        return this.dataTracker.get(PROFILE_UUID_ID);
+    }
 
     @Override
     public BdubsVariant getVariant() {
@@ -379,6 +547,20 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
     public void setShouldDespawn(boolean shouldDespawn) {
         this.dataTracker.set(SHOULD_DESPAWN_ID, shouldDespawn);
+    }
+
+    public void activateShoulderMode(PlayerEntity player) {
+        this.onShoulder = true;
+        this.shoulderRidingPlayer = player;
+//        this.setYaw(0); //<- THIS IS BAD DON'T DO
+        this.setBodyYaw(0); //HAHAHAHA FIXED THE SPINNING BUG HAHAHAHAHHAHAA... - also it's a feature now lol
+        this.prevBodyYaw = 0;
+        this.setHeadYaw(0);
+        this.prevHeadYaw = 0;
+        this.setPitch(0);
+        this.prevPitch = 0;
+
+        this.hurtTime = 0; //prevent staying hurt while on shoulder wow what a crazy bug that was
     }
 
 

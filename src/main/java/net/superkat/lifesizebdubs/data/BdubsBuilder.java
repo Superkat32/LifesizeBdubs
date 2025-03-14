@@ -15,7 +15,6 @@ public class BdubsBuilder {
     private final Identifier texture;
     private final ItemStack item;
     private Optional<ItemStack> altItem = empty();
-    private Optional<List<ItemStack>> giftables = empty();
     private Optional<List<Text>> messages = empty();
     private Optional<List<Pair<Text, Integer>>> timedMessages = empty();
 
@@ -34,11 +33,6 @@ public class BdubsBuilder {
         return this;
     }
 
-    public BdubsBuilder setGiftables(List<ItemStack> giftables) {
-        this.giftables = of(giftables);
-        return this;
-    }
-
     public BdubsBuilder setMessages(List<Text> messages) {
         this.messages = of(messages);
         return this;
@@ -50,7 +44,7 @@ public class BdubsBuilder {
     }
 
     public BdubsVariant build() {
-        return new BdubsVariant(name, texture, item, altItem, giftables, messages, timedMessages);
+        return new BdubsVariant(name, texture, item, altItem, messages, timedMessages);
     }
 
     private static<T> Optional<T> empty() { //easier to type faster

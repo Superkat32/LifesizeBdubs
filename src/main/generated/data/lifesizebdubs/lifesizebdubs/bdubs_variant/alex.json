@@ -1,0 +1,8 @@
+{
+  "name": "Alex",
+  "texture": "minecraft:textures/entity/player/slim/alex.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:sugar"
+  }
+}
