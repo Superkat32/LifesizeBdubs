@@ -89,7 +89,7 @@ public class BdubsVariants {
                 .build()
         );
 
-        debugBootstrap(registerable);
+//        debugBootstrap(registerable);
     }
 
     public static RegistryKey<BdubsVariant> of(String path) {
