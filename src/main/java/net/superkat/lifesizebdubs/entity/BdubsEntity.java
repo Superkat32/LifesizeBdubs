@@ -151,6 +151,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         AnimationController<BdubsEntity> animController = new AnimationController<>(this, BdubsAnims.controller, 5, event -> {
             if(this.isDead()) return event.setAndContinue(BdubsAnims.DEATH_ANIM);
             if(this.getSugarTicks() > 0) return event.setAndContinue(BdubsAnims.SUGAR_IDLE_ANIM);
+
             return event.setAndContinue(BdubsAnims.IDLE_ANIM);
         });
 

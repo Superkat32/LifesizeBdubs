@@ -23,7 +23,17 @@ public class BdubsAnims {
     public static final RawAnimation BOW_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.yourewelcome");
     public static final RawAnimation TADA_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.tada");
     public static final RawAnimation SMOOTH_DANCE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.smooth");
-    public static List<RawAnimation> IDLE_ANIMS = List.of(WAVE_ANIM, CHEER_ANIM, GIVEN_SUGAR_ANIM, LAUGH_ANIM, NOD_ANIM, BOW_ANIM, TADA_ANIM, SMOOTH_DANCE_ANIM);
+    public static final RawAnimation SALUTE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.salute");
+    public static final RawAnimation BREAKDANCE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.breakdance");
+    public static final RawAnimation WHATS_UP_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.whatsup");
+    public static final RawAnimation BACKFLIP_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.backflip");
+    public static final RawAnimation BALLERINA_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.ballerina");
+    public static final RawAnimation SQUARESHOWOFF_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.squareshowoff");
+    public static final RawAnimation SINGLE_WAVE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.singlewave");
+    public static List<RawAnimation> IDLE_ANIMS = List.of(
+            WAVE_ANIM, CHEER_ANIM, GIVEN_SUGAR_ANIM, LAUGH_ANIM, NOD_ANIM, BOW_ANIM, TADA_ANIM, SMOOTH_DANCE_ANIM,
+            SALUTE_ANIM, BREAKDANCE_ANIM, WHATS_UP_ANIM, BACKFLIP_ANIM, BALLERINA_ANIM, SQUARESHOWOFF_ANIM, SINGLE_WAVE_ANIM
+    );
 
     public static final RawAnimation DESPAWN_ANIM = RawAnimation.begin().thenPlayAndHold("animation.bdubs.leave");
     public static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.perish");
