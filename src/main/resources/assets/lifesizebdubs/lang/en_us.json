@@ -13,6 +13,11 @@
   "lifesizebdubs.variant.skizz": "Mini Skizz",
   "lifesizebdubs.variant.etho": "Mini Etho",
   "lifesizebdubs.variant.timmy": "Life-Size Timmy",
+  "lifesizebdubs.variant.gem": "Mini Gem",
+  "lifesizebdubs.variant.joel": "Mini Joel",
+  "lifesizebdubs.variant.tango": "Mini Tango",
+  "lifesizebdubs.variant.pearl": "Mini Pearl",
+  "lifesizebdubs.variant.impulse": "Mini Impulse",
 
   "entity.lifesizebdubs.bdubsentity": "Life-Size Bdubs",
   "entity.lifesizebdubs.funnybdubsmessage": "[%1$s]: %2$s",

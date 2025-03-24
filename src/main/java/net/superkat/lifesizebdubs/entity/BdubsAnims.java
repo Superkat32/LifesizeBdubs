@@ -12,6 +12,7 @@ import java.util.List;
 public class BdubsAnims {
 
     public static final String controller = "default";
+    public static final int DEFAULT_TRANSITION_TICKS = 5;
     public static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.idle");
     public static final RawAnimation SUGAR_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.bdubs.sugaridle");
 
@@ -30,9 +31,18 @@ public class BdubsAnims {
     public static final RawAnimation BALLERINA_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.ballerina");
     public static final RawAnimation SQUARESHOWOFF_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.squareshowoff");
     public static final RawAnimation SINGLE_WAVE_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.singlewave");
+    public static final RawAnimation CROSSED_ARMS_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.crossedarms");
+    public static final RawAnimation LOOK_AROUND_ANIM = RawAnimation.begin().thenPlay("animation.bdubs.lookaround");
+    public static final RawAnimation ITEM_SPIN_ITEM = RawAnimation.begin().thenPlay("animation.bdubs.itemspin");
+
     public static List<RawAnimation> IDLE_ANIMS = List.of(
             WAVE_ANIM, CHEER_ANIM, GIVEN_SUGAR_ANIM, LAUGH_ANIM, NOD_ANIM, BOW_ANIM, TADA_ANIM, SMOOTH_DANCE_ANIM,
-            SALUTE_ANIM, BREAKDANCE_ANIM, WHATS_UP_ANIM, BACKFLIP_ANIM, BALLERINA_ANIM, SQUARESHOWOFF_ANIM, SINGLE_WAVE_ANIM
+            SALUTE_ANIM, BREAKDANCE_ANIM, WHATS_UP_ANIM, BACKFLIP_ANIM, BALLERINA_ANIM, SQUARESHOWOFF_ANIM, SINGLE_WAVE_ANIM,
+            CROSSED_ARMS_ANIM, LOOK_AROUND_ANIM, ITEM_SPIN_ITEM
+    );
+
+    public static List<RawAnimation> NO_TRANSITION_ANIMS = List.of(
+            WHATS_UP_ANIM, BACKFLIP_ANIM, BALLERINA_ANIM, SQUARESHOWOFF_ANIM
     );
 
     public static final RawAnimation DESPAWN_ANIM = RawAnimation.begin().thenPlayAndHold("animation.bdubs.leave");

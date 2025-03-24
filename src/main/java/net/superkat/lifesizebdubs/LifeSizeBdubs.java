@@ -29,6 +29,7 @@ import net.minecraft.util.TypedActionResult;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
+import net.superkat.lifesizebdubs.item.TooltipItem;
 import net.superkat.lifesizebdubs.network.BdubsServerPayloadHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,9 @@ public class LifeSizeBdubs implements ModInitializer {
 			Identifier.of(MOD_ID, "locked_shoulder_entities"), Codec.BOOL
 	);
 
+	public static final Item IMPOSTER_EGG = registerItem(new TooltipItem(Text.translatable("item.lifesizebdubs.imposter_egg.tooltip").formatted(Formatting.ITALIC, Formatting.GRAY)), "imposter_egg");
+	public static final Item IMPOSTER_TNT = registerItem(new TooltipItem(Text.translatable("item.lifesizebdubs.imposter_tnt.tooltip").formatted(Formatting.ITALIC, Formatting.GRAY)), "imposter_tnt");
+
 	@Override
 	public void onInitialize() {
 		FabricDefaultAttributeRegistry.register(BDUBS_ENTITY, BdubsEntity.createMobAttributes());
@@ -61,6 +65,11 @@ public class LifeSizeBdubs implements ModInitializer {
 
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(itemGroup -> {
 			itemGroup.add(LIFESIZEBDUBS_SPAWN_EGG);
+		});
+
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(itemGroup -> {
+			itemGroup.add(IMPOSTER_EGG);
+			itemGroup.add(IMPOSTER_TNT);
 		});
 
 		UseItemCallback.EVENT.register((player, world, hand) -> {

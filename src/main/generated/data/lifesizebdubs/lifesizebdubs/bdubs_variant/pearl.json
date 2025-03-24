@@ -1,0 +1,14 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.pearl"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/pearl.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:sea_pickle"
+  },
+  "alt_item": {
+    "count": 1,
+    "id": "minecraft:pearlescent_froglight"
+  }
+}

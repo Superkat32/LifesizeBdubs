@@ -45,6 +45,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
@@ -70,7 +71,6 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
     public boolean onShoulder = false;
     public PlayerEntity shoulderRidingPlayer = null;
-//    public int messageTicks = 1200;
     public int messageTicks = 10;
     public int lastMessageTicks = 0;
     public List<Text> lastMessages = new ArrayList<>();
@@ -78,7 +78,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
     public int idleAnimTicks = 300;
     public int ticksSinceIdleAnim = 0;
-    public int waveTicks = 10;
+    public int waveTicks = 7;
     public int ticksSinceWave = 0;
     public int ticksSinceSpyglassWave = 0;
     public PlayerEntity spyglassWavedPlayer = null;
@@ -115,9 +115,6 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         nbt.putBoolean("shouldDespawn", shouldDespawn());
 
         if(this.profile != null && this.getProfileUuid().isPresent()) nbt.putUuid("profile_uuid", this.getProfileUuid().get());
-//        if(this.profile != null) {
-//            nbt.put("profile", ProfileComponent.CODEC.encodeStart(NbtOps.INSTANCE, this.profile).getOrThrow());
-//        }
     }
 
     @Override
@@ -148,9 +145,18 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        AnimationController<BdubsEntity> animController = new AnimationController<>(this, BdubsAnims.controller, 5, event -> {
+        AnimationController<BdubsEntity> animController = new AnimationController<>(this, BdubsAnims.controller, 0, event -> {
             if(this.isDead()) return event.setAndContinue(BdubsAnims.DEATH_ANIM);
             if(this.getSugarTicks() > 0) return event.setAndContinue(BdubsAnims.SUGAR_IDLE_ANIM);
+
+            if(event.getController().getCurrentRawAnimation() != null) {
+                RawAnimation anim = event.getController().getCurrentRawAnimation();
+                if(BdubsAnims.NO_TRANSITION_ANIMS.contains(anim)) {
+                    event.getController().transitionLength(0);
+                } else {
+                    event.getController().transitionLength(BdubsAnims.DEFAULT_TRANSITION_TICKS);
+                }
+            }
 
             return event.setAndContinue(BdubsAnims.IDLE_ANIM);
         });
@@ -198,7 +204,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
         this.ticksSinceSpyglassWave++;
 
         if(idleAnimTicks <= 0) playIdleAnim();
-        if(waveTicks == 0) this.wave(true);
+        if(waveTicks == 0) this.wave(true, true);
         tryWavingAtSpyglass();
     }
 
@@ -371,7 +377,9 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
             actuallySetVariant = !this.getWorld().isClient();
         }
 
-        if(newVariant == null || currentVariant == newVariant) return ActionResult.PASS;
+        boolean sameItem = item.isOf(this.getEquippedStack(EquipmentSlot.MAINHAND).getItem());
+
+        if(newVariant == null || (currentVariant == newVariant && sameItem)) return ActionResult.PASS;
 
         //if item is sugar, player needs to be sneaking to cycle through variants
         if(item.isOf(Items.SUGAR)) {

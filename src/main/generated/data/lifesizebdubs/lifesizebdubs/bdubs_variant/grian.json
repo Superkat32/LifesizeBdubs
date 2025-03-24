@@ -6,5 +6,9 @@
   "item": {
     "count": 1,
     "id": "minecraft:egg"
+  },
+  "alt_item": {
+    "count": 1,
+    "id": "lifesizebdubs:imposter_egg"
   }
 }

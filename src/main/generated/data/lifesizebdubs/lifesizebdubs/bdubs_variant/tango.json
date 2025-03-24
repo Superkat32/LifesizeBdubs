@@ -1,0 +1,27 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.tango"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/tango.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:redstone_block"
+  },
+  "messages": [
+    "Sneak",
+    "Stability!",
+    "Treasure Hunter!",
+    "Moment of Clarity...",
+    "Tread Lightly...",
+    "Loot and Scoot!!",
+    "Eerie Silence...",
+    "Evasion!",
+    "Stumble",
+    "Stumble!",
+    "Stumble!!",
+    "STUMBLE!!!!",
+    "Stumble Stumble Stumble!!!!",
+    "STUMBLE -... STUMBLE!!",
+    "Loot and Scoot! - Stumble! Stumble! Stumble! Stumble!"
+  ]
+}

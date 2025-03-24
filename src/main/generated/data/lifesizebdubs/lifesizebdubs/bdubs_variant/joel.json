@@ -1,0 +1,10 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.joel"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/joel.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:verdant_froglight"
+  }
+}

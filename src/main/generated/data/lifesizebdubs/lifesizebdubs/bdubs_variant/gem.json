@@ -1,0 +1,10 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.gem"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/gem.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:heart_of_the_sea"
+  }
+}

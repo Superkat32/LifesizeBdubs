@@ -45,6 +45,24 @@ public class DefaultBdubsMessages {
             "Ideally, we figure out how many blocks Tango is away from me, multiply that by 1.618, and then that can give us the distance you need to be away from him."
     );
 
+    public static List<String> TANGO_DECKED_OUT_MESSAGES = List.of(
+            "Sneak",
+            "Stability!",
+            "Treasure Hunter!",
+            "Moment of Clarity...",
+            "Tread Lightly...",
+            "Loot and Scoot!!",
+            "Eerie Silence...",
+            "Evasion!",
+            "Stumble",
+            "Stumble!",
+            "Stumble!!",
+            "STUMBLE!!!!",
+            "Stumble Stumble Stumble!!!!",
+            "STUMBLE -... STUMBLE!!",
+            "Loot and Scoot! - Stumble! Stumble! Stumble! Stumble!"
+    );
+
     public static List<Text> stringToText(List<String> stringList) {
         return stringList.stream().map(Text::of).toList();
     }

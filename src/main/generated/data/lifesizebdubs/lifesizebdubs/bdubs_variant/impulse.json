@@ -1,0 +1,10 @@
+{
+  "name": {
+    "translate": "lifesizebdubs.variant.impulse"
+  },
+  "texture": "lifesizebdubs:textures/bdubs/impulse.png",
+  "item": {
+    "count": 1,
+    "id": "minecraft:redstone"
+  }
+}

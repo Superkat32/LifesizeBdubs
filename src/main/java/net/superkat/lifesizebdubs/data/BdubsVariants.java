@@ -23,12 +23,11 @@ public class BdubsVariants {
     public static final RegistryKey<BdubsVariant> ETHO = of("etho");
     public static final RegistryKey<BdubsVariant> TIMMY = of("timmy");
 
-//    public static final RegistryKey<BdubsVariant> PEARL = of("pearl");
-//    public static final RegistryKey<BdubsVariant> GEM = of("gem");
-//    public static final RegistryKey<BdubsVariant> GEM_SAILOR = of("sailor_gem");
-//    public static final RegistryKey<BdubsVariant> JOEL = of("joel");
-//    public static final RegistryKey<BdubsVariant> TANGO = of("tango");
-//    public static final RegistryKey<BdubsVariant> IMPULSE = of("impulse");
+    public static final RegistryKey<BdubsVariant> GEM = of("gem");
+    public static final RegistryKey<BdubsVariant> JOEL = of("joel");
+    public static final RegistryKey<BdubsVariant> TANGO = of("tango");
+    public static final RegistryKey<BdubsVariant> PEARL = of("pearl");
+    public static final RegistryKey<BdubsVariant> IMPULSE = of("impulse");
 //
 //    public static final RegistryKey<BdubsVariant> TEST = of("booga");
 
@@ -43,11 +42,11 @@ public class BdubsVariants {
                 .build()
         );
 
-        //TODO - imposter tnt
         registerable.register(BDUBS_TNT, new BdubsBuilder(
                 Text.translatable("lifesizebdubs.variant.tnt"),
                 Identifier.of(MOD_ID, "textures/bdubs/tntbdubs.png"),
                 Items.TNT.getDefaultStack())
+                .setAltItem(LifeSizeBdubs.IMPOSTER_TNT.getDefaultStack())
                 .setTimedMessages(List.of(Pair.of(Text.of("AhhhAhhhh! Time to swheep!!!"), 12500)))
                 .build()
         );
@@ -59,11 +58,11 @@ public class BdubsVariants {
                 .build()
         );
 
-        //TODO - imposter egg
         registerable.register(GRIAN, new BdubsBuilder(
                 Text.translatable("lifesizebdubs.variant.grian"),
                 Identifier.of(MOD_ID, "textures/bdubs/grian.png"),
                 Items.EGG.getDefaultStack())
+                .setAltItem(LifeSizeBdubs.IMPOSTER_EGG.getDefaultStack())
                 .build()
         );
 
@@ -89,6 +88,43 @@ public class BdubsVariants {
                 .build()
         );
 
+        registerable.register(GEM, new BdubsBuilder(
+                Text.translatable("lifesizebdubs.variant.gem"),
+                Identifier.of(MOD_ID, "textures/bdubs/gem.png"),
+                Items.HEART_OF_THE_SEA.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(JOEL, new BdubsBuilder(
+                Text.translatable("lifesizebdubs.variant.joel"),
+                Identifier.of(MOD_ID, "textures/bdubs/joel.png"),
+                Items.VERDANT_FROGLIGHT.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(TANGO, new BdubsBuilder(
+                Text.translatable("lifesizebdubs.variant.tango"),
+                Identifier.of(MOD_ID, "textures/bdubs/tango.png"),
+                Items.REDSTONE_BLOCK.getDefaultStack())
+                .setMessages(DefaultBdubsMessages.stringToText(DefaultBdubsMessages.TANGO_DECKED_OUT_MESSAGES))
+                .build()
+        );
+
+        registerable.register(PEARL, new BdubsBuilder(
+                Text.translatable("lifesizebdubs.variant.pearl"),
+                Identifier.of(MOD_ID, "textures/bdubs/pearl.png"),
+                Items.SEA_PICKLE.getDefaultStack())
+                .setAltItem(Items.PEARLESCENT_FROGLIGHT.getDefaultStack())
+                .build()
+        );
+
+        registerable.register(IMPULSE, new BdubsBuilder(
+                Text.translatable("lifesizebdubs.variant.impulse"),
+                Identifier.of(MOD_ID, "textures/bdubs/impulse.png"),
+                Items.REDSTONE.getDefaultStack())
+                .build()
+        );
+
 //        debugBootstrap(registerable);
     }
 
@@ -110,21 +146,22 @@ public class BdubsVariants {
         registerable.register(STEVE, new BdubsBuilder(
                 Text.of("Steve"),
                 Identifier.ofVanilla("textures/entity/player/slim/steve.png"),
-                Items.SUGAR.getDefaultStack())
+                Items.GOLDEN_APPLE.getDefaultStack())
                 .build()
         );
 
         registerable.register(ALEX, new BdubsBuilder(
                 Text.of("Alex"),
                 Identifier.ofVanilla("textures/entity/player/slim/alex.png"),
-                Items.SUGAR.getDefaultStack())
+                Items.GOLDEN_APPLE.getDefaultStack())
+                .setAltItem(Items.DIAMOND_BOOTS.getDefaultStack())
                 .build()
         );
 
         registerable.register(ARI, new BdubsBuilder(
                 Text.of("Ari"),
                 Identifier.ofVanilla("textures/entity/player/slim/ari.png"),
-                Items.SUGAR.getDefaultStack())
+                Items.DIAMOND_BOOTS.getDefaultStack())
                 .build()
         );
 

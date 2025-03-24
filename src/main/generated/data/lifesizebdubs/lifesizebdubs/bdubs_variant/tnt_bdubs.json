@@ -7,6 +7,10 @@
     "count": 1,
     "id": "minecraft:tnt"
   },
+  "alt_item": {
+    "count": 1,
+    "id": "lifesizebdubs:imposter_tnt"
+  },
   "timed_messages": [
     {
       "msg": "AhhhAhhhh! Time to swheep!!!",
