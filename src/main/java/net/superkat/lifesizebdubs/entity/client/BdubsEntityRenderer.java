@@ -89,7 +89,7 @@ public class BdubsEntityRenderer extends GeoEntityRenderer<BdubsEntity> {
 
                 if(animatable.onShoulder) {
                     head.setRotX(head.getRotX() / 2 - animatable.shoulderRidingPlayer.getPitch() * MathHelper.RADIANS_PER_DEGREE);
-                    float netHeadYaw = animatable.shoulderRidingPlayer.getHeadYaw() - animatable.shoulderRidingPlayer.getBodyYaw();
+                    float netHeadYaw = animatable.shoulderRidingPlayer.getHeadYaw() - animatable.shoulderRidingPlayer.bodyYaw;
                     head.setRotY(head.getRotY() / 2 - netHeadYaw * MathHelper.RADIANS_PER_DEGREE);
                 }
             }

@@ -36,14 +36,14 @@ public class BdubsShoulderHandler {
                         addImposter(player, left); //adds the bdubs entity to the imposters map
                     }
 
-                    if(!player.getWorld().isClient()) return;
+//                    if(player.getWorld().isClient()) return;
 
                     if(bdubs != null) {
                         bdubs.tickMessages();
                     }
 
                     int resetTimer = resetTimers.getOrDefault(player, 1200) - 1;
-                    if(resetTimer <= 0) {
+                    if(resetTimer <= 0 && player.getWorld().isClient) {
                         resetTimer = 1200;
                         //refreshes the imposter bdubs on the client to hopefully reduce them turning invisible randomly
                         addImposter(player, true);
