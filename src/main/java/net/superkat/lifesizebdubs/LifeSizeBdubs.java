@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.entity.EntityType;
@@ -26,6 +28,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.world.GameRules;
 import net.superkat.lifesizebdubs.data.BdubsVariant;
 import net.superkat.lifesizebdubs.duck.LifeSizeBdubsPlayer;
 import net.superkat.lifesizebdubs.entity.BdubsEntity;
@@ -51,6 +54,10 @@ public class LifeSizeBdubs implements ModInitializer {
 	public static final AttachmentType<Boolean> LOCKED_SHOULDER_ENTITY_ATTACHMENT = AttachmentRegistry.createPersistent(
 			Identifier.of(MOD_ID, "locked_shoulder_entities"), Codec.BOOL
 	);
+
+    public static final GameRules.Key<GameRules.BooleanRule> AUTO_BDUBS_DESPAWN = GameRuleRegistry.register(
+            "bdubsAutoDespawn", GameRules.Category.MOBS, GameRuleFactory.createBooleanRule(true)
+    );
 
 	public static final Item IMPOSTER_EGG = registerItem(new TooltipItem(Text.translatable("item.lifesizebdubs.imposter_egg.tooltip").formatted(Formatting.ITALIC, Formatting.GRAY)), "imposter_egg");
 	public static final Item IMPOSTER_TNT = registerItem(new TooltipItem(Text.translatable("item.lifesizebdubs.imposter_tnt.tooltip").formatted(Formatting.ITALIC, Formatting.GRAY)), "imposter_tnt");

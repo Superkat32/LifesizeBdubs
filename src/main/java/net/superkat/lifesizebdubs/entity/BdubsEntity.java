@@ -183,7 +183,7 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
         this.ownerInteractionTicks++;
 
-        if(this.ownerInteractionTicks >= 6000 && (!isShowcaseMode() || shouldDespawn())) {
+        if(this.ownerInteractionTicks >= 6000 && this.getWorld().getGameRules().getBoolean(LifeSizeBdubs.AUTO_BDUBS_DESPAWN)  && (!isShowcaseMode() || shouldDespawn())) {
             BdubsAnims.triggerAnim(this, BdubsAnims.DESPAWN_ANIM);
             if(this.ownerInteractionTicks >= 6045) this.discard();
             return;
@@ -571,8 +571,6 @@ public class BdubsEntity extends TameableShoulderEntity implements VariantHolder
 
         this.hurtTime = 0; //prevent staying hurt while on shoulder wow what a crazy bug that was
     }
-
-
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
